@@ -3,11 +3,5 @@
 
 package znet
 
-import (
-	"errors"
-)
-
 // Restart Restart
-func (e *Engine) Restart() error {
-	return errors.New("windows does not support")
-}
+func (e *Engine) Restart() error { _ = "STUB: not implemented"; return nil }

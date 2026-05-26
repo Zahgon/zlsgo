@@ -4,277 +4,127 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strings"
 )
 
 // NewRequest create new request
-func NewRequest() *Request {
-	return std.NewRequest()
-}
+func NewRequest() *Request { _ = "STUB: not implemented"; return nil }
 
 // GetRequest get request from pool
-func (e *Engine) GetRequest() *Request {
-	return e.NewRequest()
-}
+func (e *Engine) GetRequest() *Request { _ = "STUB: not implemented"; return nil }
 
 // GetRequest get request from pool
-func GetRequest() *Request {
-	return std.GetRequest()
-}
+func GetRequest() *Request { _ = "STUB: not implemented"; return nil }
 
 // URL set request url
-func (r *Request) URL(url string) *Request {
-	r.url = url
-	return r
-}
+func (r *Request) URL(url string) *Request { _ = "STUB: not implemented"; return nil }
 
 // Method set request method
-func (r *Request) Method(method string) *Request {
-	r.method = strings.ToUpper(method)
-	return r
-}
+func (r *Request) Method(method string) *Request { _ = "STUB: not implemented"; return nil }
 
 // Header set request header
-func (r *Request) Header(key, value string) *Request {
-	r.headers[key] = value
-	return r
-}
+func (r *Request) Header(key, value string) *Request { _ = "STUB: not implemented"; return nil }
 
 // Headers set request headers
-func (r *Request) Headers(headers Header) *Request {
-	for k, v := range headers {
-		r.headers[k] = v
-	}
-	return r
-}
+func (r *Request) Headers(headers Header) *Request { _ = "STUB: not implemented"; return nil }
 
 // Query set query param
 func (r *Request) Query(key string, value interface{}) *Request {
-	r.queryParams[key] = value
-	return r
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // QueryMap set query params
-func (r *Request) QueryMap(params QueryParam) *Request {
-	for k, v := range params {
-		r.queryParams[k] = v
-	}
-	return r
-}
+func (r *Request) QueryMap(params QueryParam) *Request { _ = "STUB: not implemented"; return nil }
 
 // Form set form param
 func (r *Request) Form(key string, value interface{}) *Request {
-	r.formParams[key] = value
-	return r
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // FormMap set form params
-func (r *Request) FormMap(params Param) *Request {
-	for k, v := range params {
-		r.formParams[k] = v
-	}
-	return r
-}
+func (r *Request) FormMap(params Param) *Request { _ = "STUB: not implemented"; return nil }
 
 // Body set request body
-func (r *Request) Body(body interface{}) *Request {
-	r.body = body
-	return r
-}
+func (r *Request) Body(body interface{}) *Request { _ = "STUB: not implemented"; return nil }
 
 // JSON set json request body
-func (r *Request) JSON(v interface{}) *Request {
-	r.body = &bodyJson{v}
-	return r
-}
+func (r *Request) JSON(v interface{}) *Request { _ = "STUB: not implemented"; return nil }
 
 // XML set xml request body
-func (r *Request) XML(v interface{}) *Request {
-	r.body = &bodyXml{v}
-	return r
-}
+func (r *Request) XML(v interface{}) *Request { _ = "STUB: not implemented"; return nil }
 
 // File set file upload
 func (r *Request) File(fieldName, fileName string, file io.ReadCloser) *Request {
-	r.uploads = append(r.uploads, FileUpload{
-		FieldName: fieldName,
-		FileName:  fileName,
-		File:      file,
-	})
-	return r
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Client set http client
-func (r *Request) Client(client *http.Client) *Request {
-	r.client = client
-	return r
-}
+func (r *Request) Client(client *http.Client) *Request { _ = "STUB: not implemented"; return nil }
 
 // Cookie set cookie
-func (r *Request) Cookie(cookie *http.Cookie) *Request {
-	r.cookies = append(r.cookies, cookie)
-	return r
-}
+func (r *Request) Cookie(cookie *http.Cookie) *Request { _ = "STUB: not implemented"; return nil }
 
 // Context set context
-func (r *Request) Context(ctx context.Context) *Request {
-	r.ctx = ctx
-	return r
-}
+func (r *Request) Context(ctx context.Context) *Request { _ = "STUB: not implemented"; return nil }
 
 // Host set host
-func (r *Request) Host(host string) *Request {
-	r.host = host
-	return r
-}
+func (r *Request) Host(host string) *Request { _ = "STUB: not implemented"; return nil }
 
 // UploadProgress set upload progress callback
 func (r *Request) UploadProgress(progress UploadProgress) *Request {
-	r.uploadProg = progress
-	return r
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // DownloadProgress set download progress callback
 func (r *Request) DownloadProgress(progress DownloadProgress) *Request {
-	r.downloadProg = progress
-	return r
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // NoRedirect disable redirect
-func (r *Request) NoRedirect(disable bool) *Request {
-	r.noRedirect = disable
-	return r
-}
+func (r *Request) NoRedirect(disable bool) *Request { _ = "STUB: not implemented"; return nil }
 
 // Custom custom request handler
-func (r *Request) Custom(fn CustomReq) *Request {
-	r.customReq = fn
-	return r
-}
+func (r *Request) Custom(fn CustomReq) *Request { _ = "STUB: not implemented"; return nil }
 
 // Do do request
-func (r *Request) Do() (*Res, error) {
-	if r.url == "" {
-		return nil, ErrUrlNotSpecified
-	}
-
-	args := &RequestArgs{
-		Headers:      r.headers,
-		QueryParams:  r.queryParams,
-		FormParams:   r.formParams,
-		Body:         r.body,
-		Uploads:      r.uploads,
-		Client:       r.client,
-		Cookies:      r.cookies,
-		Ctx:          r.ctx,
-		Host:         r.host,
-		UploadProg:   r.uploadProg,
-		DownloadProg: r.downloadProg,
-		NoRedirect:   r.noRedirect,
-		CustomReq:    r.customReq,
-	}
-
-	method := r.method
-	if method == "" {
-		method = "GET"
-	}
-
-	return r.engine.DoWithArgs(method, r.url, args)
-}
+func (r *Request) Do() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // GET do get request
-func (r *Request) GET() (*Res, error) {
-	r.method = "GET"
-	return r.Do()
-}
+func (r *Request) GET() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // POST do post request
-func (r *Request) POST() (*Res, error) {
-	r.method = "POST"
-	return r.Do()
-}
+func (r *Request) POST() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // PUT do put request
-func (r *Request) PUT() (*Res, error) {
-	r.method = "PUT"
-	return r.Do()
-}
+func (r *Request) PUT() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // PATCH do patch request
-func (r *Request) PATCH() (*Res, error) {
-	r.method = "PATCH"
-	return r.Do()
-}
+func (r *Request) PATCH() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // DELETE do delete request
-func (r *Request) DELETE() (*Res, error) {
-	r.method = "DELETE"
-	return r.Do()
-}
+func (r *Request) DELETE() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // HEAD do head request
-func (r *Request) HEAD() (*Res, error) {
-	r.method = "HEAD"
-	return r.Do()
-}
+func (r *Request) HEAD() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // OPTIONS do options request
-func (r *Request) OPTIONS() (*Res, error) {
-	r.method = "OPTIONS"
-	return r.Do()
-}
+func (r *Request) OPTIONS() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // Reset reset request
-func (r *Request) Reset() *Request {
-	r.url = ""
-	r.method = ""
-
-	if len(r.headers) > 0 {
-		r.headers = make(Header, 8)
-	}
-	if len(r.queryParams) > 0 {
-		r.queryParams = make(QueryParam, 8)
-	}
-	if len(r.formParams) > 0 {
-		r.formParams = make(Param, 8)
-	}
-
-	r.body = nil
-	r.uploads = r.uploads[:0]
-	r.cookies = r.cookies[:0]
-	r.ctx = nil
-	r.host = ""
-	r.uploadProg = nil
-	r.downloadProg = nil
-	r.noRedirect = false
-	r.customReq = nil
-
-	return r
-}
+func (r *Request) Reset() *Request { _ = "STUB: not implemented"; return nil }
 
 // Release release request to pool
-func (r *Request) Release() {
-	r.Reset()
-	requestPool.Put(r)
-}
+func (r *Request) Release() { _ = "STUB: not implemented"; return }
 
 // DoAndRelease do request and release to pool
-func (r *Request) DoAndRelease() (*Res, error) {
-	result, err := r.Do()
-	r.Release()
-	return result, err
-}
+func (r *Request) DoAndRelease() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // GetAndRelease do get request and release to pool
-func (r *Request) GetAndRelease() (*Res, error) {
-	result, err := r.GET()
-	r.Release()
-	return result, err
-}
+func (r *Request) GetAndRelease() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // PostAndRelease do post request and release to pool
-func (r *Request) PostAndRelease() (*Res, error) {
-	result, err := r.POST()
-	r.Release()
-	return result, err
-}
+func (r *Request) PostAndRelease() (*Res, error) { _ = "STUB: not implemented"; return nil, nil }

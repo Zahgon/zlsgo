@@ -1,7 +1,6 @@
 package zstring
 
 import (
-	"errors"
 	"sync"
 	"time"
 )
@@ -38,69 +37,27 @@ type IDWorker struct {
 // NewIDWorker creates a new Snowflake ID generator with the given worker ID.
 // Returns an error if the worker ID is invalid (outside the allowed range).
 func NewIDWorker(workerid int64) (iw *IDWorker, err error) {
-	iw = new(IDWorker)
-
-	iw.maxWorkerID = getMaxWorkerID()
-
-	if workerid > iw.maxWorkerID || workerid < 0 {
-		return nil, errors.New("worker not fit")
-	}
-	iw.workerID = workerid
-	iw.lastTimeStamp = -1
-	iw.sequence = 0
-	return iw, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // getMaxWorkerID calculates the maximum worker ID based on the allocated bits.
-func getMaxWorkerID() int64 {
-	return -1 ^ -1<<sWorkerIDBits
-}
+func getMaxWorkerID() int64 { _ = "STUB: not implemented"; return 0 }
 
 // timeGen returns the current timestamp in milliseconds.
-func (iw *IDWorker) timeGen() int64 {
-	return time.Now().UnixNano() / 1000 / 1000
-}
+func (iw *IDWorker) timeGen() int64 { _ = "STUB: not implemented"; return 0 }
 
 // timeReGen ensures the timestamp is greater than the last timestamp.
 // It spins until a newer timestamp is obtained.
-func (iw *IDWorker) timeReGen(last int64) int64 {
-	ts := iw.timeGen()
-    for ts <= last {
-        ts = iw.timeGen()
-    }
-	return ts
-}
+func (iw *IDWorker) timeReGen(last int64) int64 { _ = "STUB: not implemented"; return 0 }
 
 // ID generates the next unique ID.
 // Returns the generated ID and any error that occurred during generation.
-func (iw *IDWorker) ID() (ts int64, err error) {
-	iw.Lock()
-	defer iw.Unlock()
-	ts = iw.timeGen()
-    if ts == iw.lastTimeStamp {
-		iw.sequence = (iw.sequence + 1) & sequenceMask
-		if iw.sequence == 0 {
-            ts = iw.timeReGen(iw.lastTimeStamp)
-		}
-	} else {
-		iw.sequence = 0
-	}
-
-	if ts < iw.lastTimeStamp {
-		err = errors.New("clock moved backwards, refuse gen id")
-		return 0, err
-	}
-	iw.lastTimeStamp = ts
-	ts = (ts-sEpoch)<<sTimeStampShift | iw.workerID<<sWorkerIDShift | iw.sequence
-	return ts, nil
-}
+func (iw *IDWorker) ID() (ts int64, err error) { _ = "STUB: not implemented"; return 0, nil }
 
 // ParseID extracts the components from a Snowflake ID.
 // Returns the timestamp as a time.Time, raw timestamp value, worker ID, and sequence number.
 func ParseID(id int64) (t time.Time, ts int64, workerId int64, seq int64) {
-	seq = id & sequenceMask
-	workerId = (id >> sWorkerIDShift) & sMaxWorker
-	ts = (id >> sTimeStampShift) + sEpoch
-	t = time.Unix(ts/1000, (ts%1000)*1000000)
-	return
+	_ = "STUB: not implemented"
+	return *new(time.Time), 0, 0, 0
 }

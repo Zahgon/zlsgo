@@ -1,11 +1,8 @@
 package cron
 
 import (
-	"fmt"
 	"sync"
 	"time"
-
-	"github.com/sohaha/zlsgo/zstring"
 )
 
 type (
@@ -30,95 +27,28 @@ type (
 // New creates and returns a new JobTable instance
 // Used for managing scheduled tasks
 func New() *JobTable {
-	return &JobTable{}
+	_ = "STUB: not implemented"
+
+	// Add adds a new scheduled task to the job table
+	// cronLine parameter is a standard cron expression, e.g., "0 * * * * *" means run every minute
+	// fn parameter is the function to execute
+	// Returns a function to remove the task and a possible error
+	return nil
 }
 
-// Add adds a new scheduled task to the job table
-// cronLine parameter is a standard cron expression, e.g., "0 * * * * *" means run every minute
-// fn parameter is the function to execute
-// Returns a function to remove the task and a possible error
 func (c *JobTable) Add(cronLine string, fn func()) (remove func(), err error) {
-	if fn == nil {
-		return nil, fmt.Errorf("task function cannot be nil")
-	}
-
-	var expr *Expression
-	expr, err = Parse(cronLine)
-	if err != nil {
-		return nil, fmt.Errorf("invalid cron expression '%s': %w", cronLine, err)
-	}
-
-	key := zstring.UUID()
-	c.table.Store(key, &Job{
-		expr:     expr,
-		run:      fn,
-		NextTime: expr.Next(time.Now()),
-	})
-	remove = func() {
-		c.table.Delete(key)
-	}
-	return remove, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // ForceRun immediately checks and executes all due tasks.
 func (c *JobTable) ForceRun() (nextTime time.Duration) {
-	now := time.Now()
-	nextTime = 1 * time.Second
-
-	c.table.Range(func(key, value interface{}) bool {
-		cronjob, ok := value.(*Job)
-		if !ok {
-			return true
-		}
-
-		cronjob.mu.Lock()
-		shouldRun := cronjob.NextTime.Before(now) || cronjob.NextTime.Equal(now)
-		cronjob.mu.Unlock()
-
-		if shouldRun {
-			go cronjob.run()
-
-			cronjob.mu.Lock()
-			cronjob.NextTime = cronjob.expr.Next(now)
-			cronjob.mu.Unlock()
-		}
-
-		cronjob.mu.Lock()
-		next := time.Duration(cronjob.NextTime.UnixNano() - now.UnixNano())
-		cronjob.mu.Unlock()
-
-		if next > 0 && nextTime > next {
-			nextTime = next
-		}
-		return true
-	})
-	return nextTime
+	_ = "STUB: not implemented"
+	return *new(time.Duration)
 }
 
 // Run starts the task scheduler, beginning to execute tasks according to their schedule.
-func (c *JobTable) Run(block ...bool) {
-	run := func() {
-		for {
-			c.RLock()
-			stop := c.stop
-			c.RUnlock()
-			if stop {
-				break
-			}
-			<-time.After(c.ForceRun())
-		}
-	}
-	if len(block) > 0 && block[0] {
-		run()
-		return
-	}
-
-	go run()
-}
+func (c *JobTable) Run(block ...bool) { _ = "STUB: not implemented"; return }
 
 // Stop stops the task scheduler.
-func (c *JobTable) Stop() {
-	c.Lock()
-	c.stop = true
-	c.Unlock()
-}
+func (c *JobTable) Stop() { _ = "STUB: not implemented"; return }

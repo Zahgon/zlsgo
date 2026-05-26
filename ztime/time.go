@@ -9,65 +9,52 @@ import (
 var inlay = New()
 
 // Now format current time
-func Now(format ...string) string {
-	return inlay.FormatTime(UnixMicro(Clock()), format...)
-}
+func Now(format ...string) string { _ = "STUB: not implemented"; return "" }
 
 // Time With the time zone of the time
-func Time(realTime ...bool) time.Time {
-	if len(realTime) > 0 && realTime[0] {
-		return inlay.In(time.Now())
-	}
-	return inlay.In(UnixMicro(Clock()))
-}
+func Time(realTime ...bool) time.Time { _ = "STUB: not implemented"; return *new(time.Time) }
 
 // SetTimeZone SetTimeZone
-func SetTimeZone(zone int) *TimeEngine {
-	return inlay.SetTimeZone(zone)
-}
+func SetTimeZone(zone int) *TimeEngine { _ = "STUB: not implemented"; return nil }
 
 // GetTimeZone getTimeZone
-func GetTimeZone() *time.Location {
-	return inlay.GetTimeZone()
-}
+func GetTimeZone() *time.Location { _ = "STUB: not implemented"; return nil }
 
 // FormatTime format time
-func FormatTime(t time.Time, format ...string) string {
-	return inlay.FormatTime(t, format...)
-}
+func FormatTime(t time.Time, format ...string) string { _ = "STUB: not implemented"; return "" }
 
 // FormatTimestamp format timestamp
 func FormatTimestamp(timestamp int64, format ...string) string {
-	return inlay.FormatTimestamp(timestamp, format...)
+	_ = "STUB: not implemented"
+	return ""
 }
 
-func Week(t time.Time) int {
-	return inlay.Week(t)
-}
+func Week(t time.Time) int { _ = "STUB: not implemented"; return 0 }
 
 func MonthRange(year int, month int) (beginTime, endTime int64, err error) {
-	return inlay.MonthRange(year, month)
+	_ = "STUB: not implemented"
+	return 0, 0, nil
 }
 
 // Parse string to time
 func Parse(str string, format ...string) (time.Time, error) {
-	return inlay.Parse(str, format...)
+	_ = "STUB: not implemented"
+	return *new(time.Time), nil
 }
 
 // Unix int to time
 func Unix(tt int64) time.Time {
-	return inlay.Unix(tt)
+	_ = "STUB: not implemented"
+	return *
+
+	// UnixMicro int to time
+	new(time.Time)
 }
 
-// UnixMicro int to time
-func UnixMicro(tt int64) time.Time {
-	return inlay.UnixMicro(tt)
-}
+func UnixMicro(tt int64) time.Time { _ = "STUB: not implemented"; return *new(time.Time) }
 
 // In time to time
-func In(tt time.Time) time.Time {
-	return inlay.In(tt)
-}
+func In(tt time.Time) time.Time { _ = "STUB: not implemented"; return *new(time.Time) }
 
 var clock int64
 
@@ -93,6 +80,4 @@ func init() {
 }
 
 // Clock The current microsecond timestamp has an accuracy of 100ms
-func Clock() int64 {
-	return atomic.LoadInt64(&clock)
-}
+func Clock() int64 { _ = "STUB: not implemented"; return 0 }

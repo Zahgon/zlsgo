@@ -25,51 +25,14 @@ func init() {
 	}
 }
 
-func tryApplyOnCONOUT() bool {
-	outHandle, err := syscall.Open("CONOUT$", syscall.O_RDWR, 0)
-	if err != nil {
-		return false
-	}
+func tryApplyOnCONOUT() bool { _ = "STUB: not implemented"; return false }
 
-	err = EnableTerminalProcessing(outHandle, true)
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
-func tryApplyStdout() bool {
-	err := EnableTerminalProcessing(syscall.Stdout, true)
-	if err != nil {
-		return false
-	}
-
-	return true
-}
+func tryApplyStdout() bool { _ = "STUB: not implemented"; return false }
 
 func EnableTerminalProcessing(stream syscall.Handle, enable bool) error {
-	var mode uint32
-	err := syscall.GetConsoleMode(stream, &mode)
-	if err != nil {
-		return err
-	}
-
-	if enable {
-		mode |= 0x4
-	} else {
-		mode &^= 0x4
-	}
-
-	ret, _, err := procSetConsoleMode.Call(uintptr(stream), uintptr(mode))
-	if ret == 0 {
-		return err
-	}
-
+	_ = "STUB: not implemented"
 	return nil
 }
 
 // IsSupportColor IsSupportColor
-func IsSupportColor() bool {
-	return supportColor || winEnable
-}
+func IsSupportColor() bool { _ = "STUB: not implemented"; return false }

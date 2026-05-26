@@ -1,13 +1,9 @@
 package fast
 
 import (
-	"runtime"
 	"sync"
-	"sync/atomic"
 	"time"
-	"unsafe"
 
-	"github.com/sohaha/zlsgo/ztime"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -40,67 +36,12 @@ type FastCache struct {
 
 // NewFast creates a new FastCache instance with the specified options.
 // If no options are provided, default values are used.
-func NewFast(opt ...func(o *Options)) *FastCache {
-	o := Options{
-		Cap:                 1 << 10,
-		Bucket:              4,
-		AutoCleaner:         false,
-		LazyCleaner:         true,
-		IdleAfter:           30 * time.Second,
-		ShortIdleThreshold:  30 * time.Second,
-		MediumIdleThreshold: 1 * time.Minute,
-		LongIdleThreshold:   2 * time.Minute,
-	}
+func NewFast(opt ...func(o *Options)) *FastCache { _ = "STUB: not implemented"; return nil }
 
-	for _, f := range opt {
-		f(&o)
-	}
+// Initialize timestamps to current time to avoid zero-value issues
 
-	var mask uint16
-	if o.Bucket > 0 && o.Bucket&(o.Bucket-1) == 0 {
-		mask = o.Bucket - 1
-	} else {
-		o.Bucket |= o.Bucket >> 1
-		o.Bucket |= o.Bucket >> 2
-		o.Bucket |= o.Bucket >> 4
-		mask = o.Bucket | (o.Bucket >> 8)
-	}
-	c := &FastCache{
-		locks:               make([]sync.Mutex, mask+1),
-		insts:               make([][2]*lruCache, mask+1),
-		expiration:          o.Expiration,
-		mask:                mask,
-		callback:            o.Callback,
-		autoCleaner:         o.AutoCleaner,
-		lazyCleaner:         o.LazyCleaner,
-		idleAfter:           o.IdleAfter,
-		shortIdleThreshold:  o.ShortIdleThreshold,
-		mediumIdleThreshold: o.MediumIdleThreshold,
-		longIdleThreshold:   o.LongIdleThreshold,
-	}
-	for i := range c.insts {
-		c.insts[i][0] = &lruCache{dlList: make([][2]uint16, uint32(o.Cap)+1), nodes: make([]node, o.Cap), hashmap: make(map[string]uint16, o.Cap), last: 0}
-		if o.LRU2Cap > 0 {
-			c.insts[i][1] = &lruCache{dlList: make([][2]uint16, uint32(o.LRU2Cap)+1), nodes: make([]node, o.LRU2Cap), hashmap: make(map[string]uint16, o.LRU2Cap), last: 0}
-		}
-	}
-
-	if c.expiration > 0 && c.autoCleaner {
-		c.cleanInterval = c.expiration
-		// Initialize timestamps to current time to avoid zero-value issues
-		now := ztime.Clock() * 1000
-		atomic.StoreInt64(&c.lastAccessMs, now)
-		atomic.StoreInt64(&c.lastActiveMs, now)
-
-		if !c.lazyCleaner {
-			c.startCleaner()
-		}
-		// Set finalizer as a safety net to prevent memory leaks
-		// if user forgets to call Close()
-		runtime.SetFinalizer(c, (*FastCache).finalize)
-	}
-	return c
-}
+// Set finalizer as a safety net to prevent memory leaks
+// if user forgets to call Close()
 
 // Options defines configuration parameters for creating a new FastCache instance
 type Options struct {
@@ -132,68 +73,36 @@ type Options struct {
 // set is an internal method that adds or updates an item in the cache.
 // It supports storing either an interface{} value or a byte slice.
 func (l *FastCache) set(k string, v *interface{}, b []byte, expiration ...time.Duration) {
-	if l.callback != nil {
-		if v != nil {
-			l.callback(SET, k, uintptr(unsafe.Pointer(v)))
-		} else {
-			l.callback(SET, k, uintptr(unsafe.Pointer(&b)))
-		}
-	}
-	idx := hasher(k) & l.mask
-	var expireAt int64
-	if len(expiration) > 0 {
-		if expiration[0] == -1 {
-		} else if expiration[0] > 0 {
-			expireAt = ztime.Clock()*1000 + int64(expiration[0])
-		} else if l.expiration > 0 {
-			expireAt = ztime.Clock()*1000 + int64(l.expiration)
-		}
-	} else if l.expiration > 0 {
-		expireAt = ztime.Clock()*1000 + int64(l.expiration)
-	}
-	l.locks[idx].Lock()
-	l.insts[idx][0].put(k, v, b, expireAt)
-	l.locks[idx].Unlock()
-	l.markActive()
+	_ = "STUB: not implemented"
+	return
 }
 
 // Set adds or updates an item in the cache with the specified key, value, and optional expiration.
 // If no expiration is provided, the default expiration time is used (if configured).
 func (l *FastCache) Set(key string, val interface{}, expiration ...time.Duration) {
-	l.set(key, &val, nil, expiration...)
+	_ = "STUB: not implemented"
+	return
 }
 
 // SetBytes adds or updates a byte slice in the cache with the specified key.
 // The default expiration time is used (if configured).
 func (l *FastCache) SetBytes(key string, b []byte) {
-	l.set(key, nil, b)
+	_ = "STUB: not implemented"
+
+	// Get retrieves an item from the cache by its key.
+	// Returns the item's value and a boolean indicating whether the item was found.
+	return
 }
 
-// Get retrieves an item from the cache by its key.
-// Returns the item's value and a boolean indicating whether the item was found.
 func (l *FastCache) Get(key string) (interface{}, bool) {
-	if i, b, ok := l.get(key); ok {
-		if i != nil {
-			return *i, true
-		}
-		return b, true
-	}
+	_ = "STUB: not implemented"
 	return nil, false
 }
 
 // GetBytes retrieves a byte slice from the cache by its key.
 // Returns the byte slice and a boolean indicating whether the item was found and is a byte slice.
 func (l *FastCache) GetBytes(key string) ([]byte, bool) {
-	if i, b, ok := l.get(key); ok {
-		if b != nil {
-			return b, true
-		}
-		if i == nil {
-			return nil, true
-		}
-		b, ok = (*i).([]byte)
-		return b, ok
-	}
+	_ = "STUB: not implemented"
 	return nil, false
 }
 
@@ -207,329 +116,110 @@ type provideResult struct {
 // If the item doesn't exist, the provide function is called to generate the value.
 // Returns the item's value and a boolean indicating whether the item was found or created.
 func (l *FastCache) ProvideGet(key string, provide func() (interface{}, bool), expiration ...time.Duration) (interface{}, bool) {
-	if i, b, ok := l.get(key); ok {
-		switch {
-		case i != nil:
-			return *i, true
-		case b != nil:
-			return b, true
-		default:
-			return nil, true
-		}
-	}
-
-	v, err, _ := l.gsf.Do(key, func() (interface{}, error) {
-		value, ok := provide()
-		if ok {
-			l.Set(key, value, expiration...)
-		}
-		return provideResult{value: value, ok: ok}, nil
-	})
-	if err != nil {
-		return nil, false
-	}
-
-	if res, ok := v.(provideResult); ok {
-		return res.value, res.ok
-	}
-	return v, true
+	_ = "STUB: not implemented"
+	return nil, false
 }
 
 // getValue is an internal method that retrieves a node from a specific cache level.
 // It also handles expiration checking and marking expired items as deleted.
 func (l *FastCache) getValue(key string, idx, level uint16) (*node, int) {
-	n, s := l.insts[idx][level].get(key)
-	if s > 0 {
-		if !n.isDelete && (n.expireAt == 0 || (ztime.Clock()*1000 <= n.expireAt)) {
-			return n, s
-		}
-		n.isDelete, n.value.value, n.value.byteValue = true, nil, nil
-	}
+	_ = "STUB: not implemented"
 	return nil, 0
 }
 
 // get is an internal method that retrieves an item from the cache.
 // It handles the multi-level LRU logic and callback invocation.
 func (l *FastCache) get(key string) (i *interface{}, b []byte, loaded bool) {
-	idx := hasher(key) & l.mask
-	l.locks[idx].Lock()
-	n, s := (*node)(nil), 0
-	if l.insts[idx][1] == nil {
-		n, s = l.getValue(key, idx, 0)
-	} else {
-		e := int64(0)
-		if n, s, e = l.insts[idx][0].delete(key); s <= 0 {
-			n, s = l.getValue(key, idx, 1)
-		} else {
-			l.insts[idx][1].put(key, n.value.value, n.value.byteValue, e)
-		}
-	}
-	if s <= 0 {
-		l.locks[idx].Unlock()
-		if l.callback != nil {
-			l.callback(GET, key, uintptr(0))
-		}
-		return
-	}
-	i, b = n.value.value, n.value.byteValue
-	l.locks[idx].Unlock()
-	if l.callback != nil {
-		if i != nil {
-			l.callback(GET, key, uintptr(unsafe.Pointer(i)))
-		} else {
-			var b interface{} = b
-			l.callback(GET, key, uintptr(unsafe.Pointer(&b)))
-		}
-	}
-	return i, b, true
+	_ = "STUB: not implemented"
+	return nil, nil, false
 }
 
 // Delete removes an item with the specified key from the cache.
 // If the item doesn't exist, this operation is a no-op.
-func (l *FastCache) Delete(key string) {
-	idx := hasher(key) & l.mask
-	l.locks[idx].Lock()
-	n, s, e := l.insts[idx][0].delete(key)
-	if l.insts[idx][1] != nil {
-		if n2, s2, e2 := l.insts[idx][1].delete(key); n2 != nil && (n == nil || e < e2) {
-			n, s = n2, s2
-		}
-	}
-	if s > 0 {
-		if l.callback != nil {
-			if n.value.value != nil {
-				l.callback(DELETE, key, uintptr(unsafe.Pointer(n.value.value)))
-			} else {
-				l.callback(DELETE, key, uintptr(unsafe.Pointer(&n.value.byteValue)))
-			}
-		}
-		n.value.value, n.value.byteValue = nil, nil
-	} else if l.callback != nil {
-		l.callback(DELETE, key, uintptr(0))
-	}
-
-	l.locks[idx].Unlock()
-}
+func (l *FastCache) Delete(key string) { _ = "STUB: not implemented"; return }
 
 // ForEach iterates through all items in the cache and applies the provided function to each key-value pair.
 // The iteration continues as long as the function returns true, and stops when it returns false.
 func (l *FastCache) ForEach(walker func(key string, iface interface{}) bool) {
-	for i := range l.insts {
-		l.locks[i].Lock()
-		if l.insts[i][0].forEach(walker); l.insts[i][1] != nil {
-			l.insts[i][1].forEach(walker)
-		}
-		l.locks[i].Unlock()
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
-func (l *FastCache) clean() {
-	if len(l.insts) == 0 {
-		return
-	}
+func (l *FastCache) clean() { _ = "STUB: not implemented"; return }
 
-	now := ztime.Clock() * 1000
+// Optimized level calculation - avoid unnecessary computation
 
-	// Optimized level calculation - avoid unnecessary computation
-	currentLevel := atomic.LoadInt32(&l.cleanerLevel)
+// For performance, only recalculate level periodically or when activity changes
+// Check if we need to recalculate based on idle duration
 
-	// For performance, only recalculate level periodically or when activity changes
-	// Check if we need to recalculate based on idle duration
-	lastAccess := atomic.LoadInt64(&l.lastAccessMs)
-	idleDuration := time.Duration(now-lastAccess) * time.Millisecond
+// Calculate target level using configurable thresholds
 
-	// Calculate target level using configurable thresholds
-	var targetLevel int32
-	switch {
-	case idleDuration < l.shortIdleThreshold:
-		targetLevel = 0 // Normal cleaning
-	case idleDuration < l.mediumIdleThreshold:
-		targetLevel = 1 // Reduced frequency (skip every other clean)
-	case idleDuration < l.longIdleThreshold:
-		targetLevel = 2 // Light cleaning (skip 4 out of 5 cleans)
-	default:
-		targetLevel = 3 // Stop cleaning
-	}
+// Normal cleaning
 
-	// Only update level if it actually changed - avoid unnecessary atomic write
-	if currentLevel != targetLevel {
-		atomic.StoreInt32(&l.cleanerLevel, targetLevel)
-		currentLevel = targetLevel // Update local copy for following logic
-	}
+// Reduced frequency (skip every other clean)
 
-	// Stop cleaner if idle too long
-	if currentLevel == 3 {
-		l.stopCleaner()
-		return
-	}
+// Light cleaning (skip 4 out of 5 cleans)
 
-	// Apply frequency reduction based on current level
-	cleanCycle := uint16(1)
-	switch currentLevel {
-	case 1: // Reduced frequency: clean every 2nd cycle
-		cleanCycle = 2
-	case 2: // Light cleaning: clean every 5th cycle
-		cleanCycle = 5
-	}
+// Stop cleaning
 
-	// Skip cleaning cycles based on level
-	if currentLevel > 0 && (l.cleanIdx%cleanCycle) != 0 {
-		l.cleanIdx++
-		return
-	}
+// Only update level if it actually changed - avoid unnecessary atomic write
 
-	idx := l.cleanIdx & l.mask
-	l.cleanIdx++
-	l.locks[idx].Lock()
-	if l.insts[idx][0] != nil {
-		l.insts[idx][0].cleanExpired(now)
-	}
-	if l.insts[idx][1] != nil {
-		l.insts[idx][1].cleanExpired(now)
-	}
-	l.locks[idx].Unlock()
+// Update local copy for following logic
 
-	// Enhanced idle detection with additional safety checks
-	if l.idleAfter > 0 && (l.cleanIdx&l.mask) == 0 {
-		allEmpty := true
-		for i := range l.insts {
-			l.locks[i].Lock()
-			if (l.insts[i][0] != nil && !l.insts[i][0].isEmpty()) || (l.insts[i][1] != nil && !l.insts[i][1].isEmpty()) {
-				allEmpty = false
-				l.locks[i].Unlock()
-				break
-			}
-			l.locks[i].Unlock()
-		}
-		if allEmpty {
-			lastActive := atomic.LoadInt64(&l.lastActiveMs)
-			if lastActive > 0 && time.Duration(now-lastActive)*time.Millisecond >= l.idleAfter {
-				l.stopCleaner()
-			}
-		}
-	}
-}
+// Stop cleaner if idle too long
+
+// Apply frequency reduction based on current level
+
+// Reduced frequency: clean every 2nd cycle
+
+// Light cleaning: clean every 5th cycle
+
+// Skip cleaning cycles based on level
+
+// Enhanced idle detection with additional safety checks
 
 // Close stops the background cleaner if it is running.
 // Enhanced with finalizer cleanup to optimize GC performance.
 func (l *FastCache) Close() {
+	_ = "STUB: not implemented"
 	// Mark as closed to prevent finalize from running
 	// Use SwapInt32 to avoid race condition in CompareAndSwap
-	oldLevel := atomic.SwapInt32(&l.cleanerLevel, -1)
-	if oldLevel >= 0 {
-		// Clear finalizer since we're properly closing manually
-		// This reduces GC pressure and prevents unnecessary finalize calls
-		runtime.SetFinalizer(l, nil)
-
-		// Stop the cleaner
-		l.stopCleaner()
-	}
-
-	// Ensure channel is closed for backward compatibility
-	if l.stopCh != nil {
-		select {
-		case <-l.stopCh:
-		default:
-			close(l.stopCh)
-		}
-	}
+	return
 }
+
+// Clear finalizer since we're properly closing manually
+// This reduces GC pressure and prevents unnecessary finalize calls
+
+// Stop the cleaner
+
+// Ensure channel is closed for backward compatibility
 
 // markActive records recent activity and triggers lazy cleaner start if needed.
 // Enhanced with more precise activity tracking and optimized atomic operations.
-func (l *FastCache) markActive() {
-	if l.expiration <= 0 || !l.autoCleaner {
-		return
-	}
-	now := ztime.Clock() * 1000
+func (l *FastCache) markActive() { _ = "STUB: not implemented"; return }
 
-	// Batch update timestamps (most frequent operations)
-	atomic.StoreInt64(&l.lastActiveMs, now)
-	atomic.StoreInt64(&l.lastAccessMs, now)
-	atomic.AddInt64(&l.accessCount, 1)
+// Batch update timestamps (most frequent operations)
 
-	// Optimized cleaner level reset - avoid unnecessary atomic operations
-	// Only reset if level is elevated (most common case is level already 0)
-	if atomic.LoadInt32(&l.cleanerLevel) > 0 {
-		atomic.StoreInt32(&l.cleanerLevel, 0)
-	}
-
-	if l.lazyCleaner {
-		l.startCleaner()
-	}
-}
+// Optimized cleaner level reset - avoid unnecessary atomic operations
+// Only reset if level is elevated (most common case is level already 0)
 
 // startCleaner starts the background cleaner if not already running.
-func (l *FastCache) startCleaner() {
-	l.cleanerMu.Lock()
-	defer l.cleanerMu.Unlock()
-
-	if l.cleanerOn || l.expiration <= 0 || !l.autoCleaner {
-		return
-	}
-
-	if l.cleanInterval == 0 {
-		l.cleanInterval = l.expiration
-	}
-
-	if l.stopCh == nil {
-		l.stopCh = make(chan struct{})
-	}
-
-	l.cleanerOn = true
-
-	ticker := time.NewTicker(l.cleanInterval)
-	l.ticker = ticker
-	stop := l.stopCh
-
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				l.clean()
-			case <-stop:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-}
+func (l *FastCache) startCleaner() { _ = "STUB: not implemented"; return }
 
 // stopCleaner stops the background cleaner if running.
-func (l *FastCache) stopCleaner() {
-	l.cleanerMu.Lock()
-	defer l.cleanerMu.Unlock()
-
-	if !l.cleanerOn {
-		return
-	}
-
-	if l.stopCh != nil {
-		select {
-		case <-l.stopCh:
-		default:
-			close(l.stopCh)
-		}
-	}
-
-	l.cleanerOn = false
-	l.stopCh = nil
-
-	l.ticker = nil
-}
+func (l *FastCache) stopCleaner() { _ = "STUB: not implemented"; return }
 
 // finalize is called by the garbage collector as a safety net to ensure
 // that background goroutines are properly cleaned up even if Close() wasn't called.
 // This prevents memory leaks in cases where users forget to call Close().
 func (l *FastCache) finalize() {
+	_ = "STUB: not implemented"
 	// Use SwapInt32 to atomically mark as finalized and get previous state
 	// This avoids race condition and eliminates need to check cleanerOn
-	oldLevel := atomic.SwapInt32(&l.cleanerLevel, -1)
-	if oldLevel >= 0 {
-		// Previous level was valid (not already closed), so cleanup is needed
-		l.stopCleaner()
-	}
+	return
 }
+
+// Previous level was valid (not already closed), so cleanup is needed
 
 // Stats represents cache performance and status statistics
 type Stats struct {
@@ -546,47 +236,21 @@ type Stats struct {
 }
 
 // GetStats returns current cache statistics for monitoring and debugging
-func (l *FastCache) GetStats() Stats {
-	now := ztime.Clock() * 1000
-	lastAccess := atomic.LoadInt64(&l.lastAccessMs)
-	idleDuration := time.Duration(now-lastAccess) * time.Millisecond
+func (l *FastCache) GetStats() Stats { _ = "STUB: not implemented"; return *new(Stats) }
 
-	// Count items across all buckets
-	totalItems := 0
-	for i := range l.insts {
-		l.locks[i].Lock()
-		if l.insts[i][0] != nil {
-			totalItems += l.insts[i][0].size
-		}
-		if l.insts[i][1] != nil {
-			totalItems += l.insts[i][1].size
-		}
-		l.locks[i].Unlock()
-	}
+// Count items across all buckets
 
-	return Stats{
-		CleanerLevel:     atomic.LoadInt32(&l.cleanerLevel),
-		AccessCount:      atomic.LoadInt64(&l.accessCount),
-		IdleDuration:     idleDuration,
-		IsCleanerRunning: l.cleanerOn, // Note: this may have slight race condition but for monitoring it's acceptable
-		TotalItems:       totalItems,
-	}
-}
+// Note: this may have slight race condition but for monitoring it's acceptable
 
 // GetCleanerLevel returns the current cleaning intensity level
 // 0=normal, 1=reduced frequency, 2=light cleaning, 3=stopped
-func (l *FastCache) GetCleanerLevel() int32 {
-	return atomic.LoadInt32(&l.cleanerLevel)
-}
+func (l *FastCache) GetCleanerLevel() int32 { _ = "STUB: not implemented"; return 0 }
 
 // GetAccessCount returns total number of accesses since cache creation
-func (l *FastCache) GetAccessCount() int64 {
-	return atomic.LoadInt64(&l.accessCount)
-}
+func (l *FastCache) GetAccessCount() int64 { _ = "STUB: not implemented"; return 0 }
 
 // GetIdleDuration returns how long the cache has been idle
 func (l *FastCache) GetIdleDuration() time.Duration {
-	now := ztime.Clock() * 1000
-	lastAccess := atomic.LoadInt64(&l.lastAccessMs)
-	return time.Duration(now-lastAccess) * time.Millisecond
+	_ = "STUB: not implemented"
+	return *new(time.Duration)
 }

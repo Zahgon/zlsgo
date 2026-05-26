@@ -27,93 +27,31 @@ var bufPools = NewBufferPool(BuffSize, (1<<20)*100)
 
 // NewBufferPool creates a new BufferPool with buffer sizes ranging from
 // left to right bytes (rounded up to powers of two).
-func NewBufferPool(left, right uint) *BufferPool {
-	begin, end := int(roundUpToPowerOfTwo(left)), int(roundUpToPowerOfTwo(right))
-	p := &BufferPool{
-		begin:  begin,
-		end:    end,
-		shards: map[int]*sync.Pool{},
-	}
-	for i := begin; i <= end; i *= 2 {
-		capacity := i
-		p.shards[i] = &sync.Pool{
-			New: func() interface{} { return bytes.NewBuffer(make([]byte, 0, capacity)) },
-		}
-	}
-	return p
-}
+func NewBufferPool(left, right uint) *BufferPool { _ = "STUB: not implemented"; return nil }
 
 // Put returns a buffer to the pool.
 // If noreset is not provided or false, the buffer will be reset before being returned to the pool.
 // If the buffer's capacity doesn't match any pool size, it will be discarded.
-func (p *BufferPool) Put(b *bytes.Buffer, noreset ...bool) {
-	if b != nil {
-		if pool, ok := p.shards[b.Cap()]; ok {
-			if len(noreset) == 0 || !noreset[0] {
-				b.Reset()
-			}
-
-			pool.Put(b)
-		}
-	}
-}
+func (p *BufferPool) Put(b *bytes.Buffer, noreset ...bool) { _ = "STUB: not implemented"; return }
 
 // Get retrieves a buffer from the pool with at least the requested capacity.
 // If n is provided, it specifies the minimum capacity of the returned buffer.
 // If no buffer of appropriate size is available, a new one will be created.
-func (p *BufferPool) Get(n ...uint) *bytes.Buffer {
-	size := int(max(uint(p.begin), n...))
-	if pool, ok := p.shards[size]; ok {
-		b := pool.Get().(*bytes.Buffer)
-		if b.Cap() < size {
-			b.Grow(size)
-			b.Reset()
-		}
-		return b
-	}
-	return bytes.NewBuffer(make([]byte, 0, size))
-}
+func (p *BufferPool) Get(n ...uint) *bytes.Buffer { _ = "STUB: not implemented"; return nil }
 
 // roundUpToPowerOfTwo rounds up a number to the next power of two.
 // For example, 15 becomes 16, 17 becomes 32, etc.
-func roundUpToPowerOfTwo(v uint) uint {
-	v--
-	v |= v >> 1
-	v |= v >> 2
-	v |= v >> 4
-	v |= v >> 8
-	v |= v >> 16
-	v++
-	return v
-}
+func roundUpToPowerOfTwo(v uint) uint { _ = "STUB: not implemented"; return 0 }
 
 // max determines the maximum buffer size based on the provided parameters.
 // It rounds up the requested size to the next power of two and ensures it's
 // at least as large as the minimum size a.
-func max(a uint, n ...uint) (size uint) {
-	if len(n) > 0 && n[0] > 0 {
-		size = n[0]
-	} else {
-		size = BuffSize
-	}
-
-	b := roundUpToPowerOfTwo(size)
-
-	if a > b {
-		return a
-	}
-
-	return b
-}
+func max(a uint, n ...uint) (size uint) { _ = "STUB: not implemented"; return 0 }
 
 // GetBuff retrieves a buffer from the global buffer pool with at least the requested capacity.
 // This is a convenience function that uses the global bufPools instance.
-func GetBuff(size ...uint) *bytes.Buffer {
-	return bufPools.Get(size...)
-}
+func GetBuff(size ...uint) *bytes.Buffer { _ = "STUB: not implemented"; return nil }
 
 // PutBuff returns a buffer to the global buffer pool.
 // This is a convenience function that uses the global bufPools instance.
-func PutBuff(buffer *bytes.Buffer, noreset ...bool) {
-	bufPools.Put(buffer, noreset...)
-}
+func PutBuff(buffer *bytes.Buffer, noreset ...bool) { _ = "STUB: not implemented"; return }

@@ -9,6 +9,4 @@ type Template interface {
 	Render(io.Writer, string, interface{}, ...string) error
 }
 
-func (e *Engine) SetTemplate(v Template) {
-	e.views = v
-}
+func (e *Engine) SetTemplate(v Template) { _ = "STUB: not implemented"; return }

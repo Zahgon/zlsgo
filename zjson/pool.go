@@ -11,13 +11,6 @@ var pathCachePool = sync.Pool{
 	},
 }
 
-func getPathCache() []pathResult {
-	return pathCachePool.Get().([]pathResult)[:0]
-}
+func getPathCache() []pathResult { _ = "STUB: not implemented"; return nil }
 
-func putPathCache(cache []pathResult) {
-	if cap(cache) > 32 {
-		return
-	}
-	pathCachePool.Put(cache)
-}
+func putPathCache(cache []pathResult) { _ = "STUB: not implemented"; return }

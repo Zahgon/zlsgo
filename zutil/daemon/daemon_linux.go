@@ -1,10 +1,7 @@
 package daemon
 
 import (
-	"context"
 	"errors"
-	"fmt"
-	"os"
 	"strings"
 	"text/template"
 )
@@ -41,29 +38,18 @@ func init() {
 	})
 }
 
-func (sc linuxSystemService) String() string {
-	return sc.name
-}
+func (sc linuxSystemService) String() string { _ = "STUB: not implemented"; return "" }
 
-func (sc linuxSystemService) Detect() bool {
-	return sc.detect()
-}
+func (sc linuxSystemService) Detect() bool { _ = "STUB: not implemented"; return false }
 
-func (sc linuxSystemService) Interactive() bool {
-	return sc.interactive()
-}
+func (sc linuxSystemService) Interactive() bool { _ = "STUB: not implemented"; return false }
 
 func (sc linuxSystemService) New(i Iface, c *Config) (s ServiceIface, err error) {
-	s, err = sc.new(i, c)
-	if err == nil {
-		err = isSudo()
-	}
-	return
+	_ = "STUB: not implemented"
+	return *new(ServiceIface), nil
 }
 
-func isInteractive() (bool, error) {
-	return os.Getppid() != 1, nil
-}
+func isInteractive() (bool, error) { _ = "STUB: not implemented"; return false, nil }
 
 var tf = map[string]interface{}{
 	"cmd": func(s string) string {
@@ -74,171 +60,32 @@ var tf = map[string]interface{}{
 	},
 }
 
-func isSystemd() bool {
-	if _, err := os.Stat("/run/systemd/system"); err == nil {
-		return true
-	}
-	return false
-}
+func isSystemd() bool { _ = "STUB: not implemented"; return false }
 
 func newSystemdService(i Iface, c *Config) (ServiceIface, error) {
-	if c.Context == nil {
-		c.Context = context.Background()
-	}
-
-	s := &systemd{
-		i:      i,
-		Config: c,
-	}
-
-	return s, nil
+	_ = "STUB: not implemented"
+	return *new(ServiceIface), nil
 }
 
-func (s *systemd) String() string {
-	if len(s.DisplayName) > 0 {
-		return s.DisplayName
-	}
-	return s.Name
-}
+func (s *systemd) String() string { _ = "STUB: not implemented"; return "" }
 
-func (s *systemd) configPath() (cp string, err error) {
-	userService := optionUserServiceDefault
-	if u, ok := s.Options[optionUserService]; ok {
-		userService = u.(bool)
-	}
-	if userService {
-		err = errNoUserServiceSystemd
-		return
-	}
-	cp = "/etc/systemd/system/" + s.Config.Name + ".service"
-	return
-}
+func (s *systemd) configPath() (cp string, err error) { _ = "STUB: not implemented"; return "", nil }
 
-func (s *systemd) template() *template.Template {
-	return template.Must(template.New("").Funcs(tf).Parse(systemdScript))
-}
+func (s *systemd) template() *template.Template { _ = "STUB: not implemented"; return nil }
 
-func (s *systemd) Install() error {
-	confPath, err := s.configPath()
-	if err != nil {
-		return err
-	}
-	_, err = os.Stat(confPath)
-	if err == nil {
-		return fmt.Errorf("init already exists: %s", confPath)
-	}
+func (s *systemd) Install() error { _ = "STUB: not implemented"; return nil }
 
-	f, err := os.Create(confPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	reloadSignal := ""
-	if v, ok := s.Options[optionReloadSignal]; ok {
-		reloadSignal, _ = v.(string)
-	}
-	pidFile := ""
-	if v, ok := s.Options[optionPIDFile]; ok {
-		pidFile, _ = v.(string)
-	}
-	path := s.execPath()
-	to := &struct {
-		*Config
-		Path         string
-		ReloadSignal string
-		PIDFile      string
-	}{
-		s.Config,
-		path,
-		reloadSignal,
-		pidFile,
-	}
+func (s *systemd) Uninstall() error { _ = "STUB: not implemented"; return nil }
 
-	err = s.template().Execute(f, to)
-	if err != nil {
-		return err
-	}
+func (s *systemd) Run() (err error) { _ = "STUB: not implemented"; return nil }
 
-	err = run("systemctl", "enable", s.Name+".service")
-	if err != nil {
-		return err
-	}
-	return run("systemctl", "daemon-reload")
-}
+func (s *systemd) Start() error { _ = "STUB: not implemented"; return nil }
 
-func (s *systemd) Uninstall() error {
-	_ = run("systemctl", "stop", s.Name+".service")
-	err := run("systemctl", "disable", s.Name+".service")
-	if err != nil {
-		return err
-	}
-	cp, err := s.configPath()
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(cp); err != nil {
-		return err
-	}
-	return nil
-}
+func (s *systemd) Stop() error { _ = "STUB: not implemented"; return nil }
 
-func (s *systemd) Run() (err error) {
-	err = s.i.Start(s)
-	if err != nil {
-		return err
-	}
+func (s *systemd) Restart() error { _ = "STUB: not implemented"; return nil }
 
-	runWait := func() {
-		select {
-		case <-SingleKillSignal():
-		case <-s.Config.Context.Done():
-		}
-	}
-	if v, ok := s.Options[optionRunWait]; ok {
-		runWait, _ = v.(func())
-	}
-
-	runWait()
-
-	return s.i.Stop(s)
-}
-
-func (s *systemd) Start() error {
-	if os.Getuid() == 0 {
-		return run("systemctl", "start", s.Name+".service")
-	} else {
-		return run("sudo", "-n", "systemctl", "start", s.Name+".service")
-	}
-}
-
-func (s *systemd) Stop() error {
-	if os.Getuid() == 0 {
-		return run("systemctl", "stop", s.Name+".service")
-	} else {
-		return run("sudo", "-n", "systemctl", "stop", s.Name+".service")
-	}
-}
-
-func (s *systemd) Restart() error {
-	if os.Getuid() == 0 {
-		return run("systemctl", "restart", s.Name+".service")
-	} else {
-		return run("sudo", "-n", "systemctl", "restart", s.Name+".service")
-	}
-}
-
-func (s *systemd) Status() string {
-	var res string
-	if os.Getuid() == 0 {
-		res, _ = runGrep("running", "systemctl", "status", s.Name+".service")
-	} else {
-		res, _ = runGrep("running", "sudo", "-n", "systemctl", "status", s.Name+".service")
-	}
-	if res != "" {
-		return "Running"
-	}
-	return "Stop"
-}
+func (s *systemd) Status() string { _ = "STUB: not implemented"; return "" }
 
 const systemdScript = `[Unit]
 Description={{.Description}}

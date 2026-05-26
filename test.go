@@ -1,11 +1,6 @@
 package zlsgo
 
 import (
-	"path/filepath"
-	"reflect"
-	"runtime"
-	"strconv"
-	"strings"
 	"testing"
 )
 
@@ -48,251 +43,119 @@ type TestUtil struct {
 // The returned helper uses the testing logger for assertion output and is
 // intended for test assertions plus lightweight subtest orchestration.
 // Methods T, Run, and Parallel require the underlying value to be *testing.T.
-func NewTest(t testing.TB) *TestUtil {
-	return newTestUtil(t, t)
-}
+func NewTest(t testing.TB) *TestUtil { _ = "STUB: not implemented"; return nil }
 
 // newTestUtil builds a TestUtil with a custom reporter.
 func newTestUtil(tb testing.TB, reporter testReporter) *TestUtil {
-	return &TestUtil{tb: tb, reporter: reporter}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // GetCallerInfo returns the file name and line number of the test caller.
-func (u *TestUtil) GetCallerInfo() string {
-	for depth := 1; depth < 20; depth++ {
-		_, file, line, ok := runtime.Caller(depth)
-		if !ok {
-			break
-		}
-		if !strings.HasSuffix(file, "_test.go") {
-			continue
-		}
-		return filepath.Base(file) + ":" + strconv.Itoa(line)
-	}
-	return unableCallerInfo
-}
+func (u *TestUtil) GetCallerInfo() string { _ = "STUB: not implemented"; return "" }
 
 // Equal compares expected and actual values with reflect.DeepEqual.
 // Passing true in exit will stop the current test immediately on failure.
 func (u *TestUtil) Equal(expected, actual interface{}, exit ...bool) bool {
-	if valuesEqual(expected, actual) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待:%v (type %s) - 结果:%v (type %s)",
-		u.PrintMyName(), expected, valueType(expected), actual, valueType(actual),
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // NoEqual compares expected and actual values and asserts they are not equal.
 func (u *TestUtil) NoEqual(expected, actual interface{}, exit ...bool) bool {
-	if !valuesEqual(expected, actual) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待不等于:%v (type %s) - 结果:%v (type %s)",
-		u.PrintMyName(), expected, valueType(expected), actual, valueType(actual),
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // EqualTrue asserts that the actual value is true.
-func (u *TestUtil) EqualTrue(actual interface{}, exit ...bool) {
-	u.Equal(true, actual, exit...)
-}
+func (u *TestUtil) EqualTrue(actual interface{}, exit ...bool) { _ = "STUB: not implemented"; return }
 
 // EqualFalse asserts that the actual value is false.
-func (u *TestUtil) EqualFalse(actual interface{}, exit ...bool) {
-	u.Equal(false, actual, exit...)
-}
+func (u *TestUtil) EqualFalse(actual interface{}, exit ...bool) { _ = "STUB: not implemented"; return }
 
 // True asserts that the actual boolean value is true.
-func (u *TestUtil) True(actual bool, exit ...bool) bool {
-	if actual {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待:true - 结果:false", u.PrintMyName())
-}
+func (u *TestUtil) True(actual bool, exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // False asserts that the actual boolean value is false.
-func (u *TestUtil) False(actual bool, exit ...bool) bool {
-	if !actual {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待:false - 结果:true", u.PrintMyName())
-}
+func (u *TestUtil) False(actual bool, exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // EqualNil asserts that the actual value is nil.
-func (u *TestUtil) EqualNil(actual interface{}, exit ...bool) {
-	u.IsNil(actual, exit...)
-}
+func (u *TestUtil) EqualNil(actual interface{}, exit ...bool) { _ = "STUB: not implemented"; return }
 
 // NoError asserts that err is nil and reports failures through testing output.
-func (u *TestUtil) NoError(err error, exit ...bool) bool {
-	if err == nil {
-		return true
-	}
-	return u.failAssertion(exit, "%s Error: %v", u.PrintMyName(), err)
-}
+func (u *TestUtil) NoError(err error, exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // Error asserts that err is not nil.
-func (u *TestUtil) Error(err error, exit ...bool) bool {
-	if err != nil {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待 error 不为 nil", u.PrintMyName())
-}
+func (u *TestUtil) Error(err error, exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // ErrorContains asserts that err is not nil and its message contains expected.
 func (u *TestUtil) ErrorContains(expected string, err error, exit ...bool) bool {
-	if err == nil {
-		return u.failAssertion(exit, "%s 期待 error 包含:%q - 结果:nil", u.PrintMyName(), expected)
-	}
-	if strings.Contains(err.Error(), expected) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待 error 包含:%q - 结果:%q",
-		u.PrintMyName(), expected, err.Error(),
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // EqualExit compares expected and actual values and immediately fails the test if not equal.
-func (u *TestUtil) EqualExit(expected, actual interface{}) {
-	u.Equal(expected, actual, true)
-}
+func (u *TestUtil) EqualExit(expected, actual interface{}) { _ = "STUB: not implemented"; return }
 
 // Contains asserts that actual contains expected.
 func (u *TestUtil) Contains(expected, actual string, exit ...bool) bool {
-	if strings.Contains(actual, expected) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待包含:%q - 结果:%q",
-		u.PrintMyName(), expected, actual,
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // NotContains asserts that actual does not contain expected.
 func (u *TestUtil) NotContains(expected, actual string, exit ...bool) bool {
-	if !strings.Contains(actual, expected) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待不包含:%q - 结果:%q",
-		u.PrintMyName(), expected, actual,
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // Len asserts that the actual value length matches the expected length.
 func (u *TestUtil) Len(expected int, actual interface{}, exit ...bool) bool {
-	length, ok := lengthOf(actual)
-	if !ok {
-		return u.failAssertion(exit, "%s 无法获取长度 (type %s)", u.PrintMyName(), valueType(actual))
-	}
-	if length == expected {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待长度:%d - 结果:%d (type %s)",
-		u.PrintMyName(), expected, length, valueType(actual),
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // Panics asserts that fn panics.
-func (u *TestUtil) Panics(fn func(), exit ...bool) bool {
-	if fn == nil {
-		return u.failAssertion(exit, "%s 期待 panic - 结果:函数为 nil", u.PrintMyName())
-	}
-	panicked, recovered := catchPanic(fn)
-	if panicked {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待 panic - 结果:未发生 panic (%v)", u.PrintMyName(), recovered)
-}
+func (u *TestUtil) Panics(fn func(), exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // NotPanics asserts that fn does not panic.
-func (u *TestUtil) NotPanics(fn func(), exit ...bool) bool {
-	if fn == nil {
-		return u.failAssertion(exit, "%s 期待不 panic - 结果:函数为 nil", u.PrintMyName())
-	}
-	panicked, recovered := catchPanic(fn)
-	if !panicked {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待不 panic - 结果:%v", u.PrintMyName(), recovered)
-}
+func (u *TestUtil) NotPanics(fn func(), exit ...bool) bool { _ = "STUB: not implemented"; return false }
 
 // Log logs the given values to the test output.
-func (u *TestUtil) Log(v ...interface{}) {
-	u.reporter.Helper()
-	u.reporter.Log(v...)
-}
+func (u *TestUtil) Log(v ...interface{}) { _ = "STUB: not implemented"; return }
 
 // Logf logs the formatted string to the test output.
-func (u *TestUtil) Logf(format string, args ...interface{}) {
-	u.reporter.Helper()
-	u.reporter.Logf(format, args...)
-}
+func (u *TestUtil) Logf(format string, args ...interface{}) { _ = "STUB: not implemented"; return }
 
 // Fatal logs the given values to the test output and immediately fails the test.
-func (u *TestUtil) Fatal(v ...interface{}) {
-	u.reporter.Helper()
-	u.reporter.Fatal(v...)
-}
+func (u *TestUtil) Fatal(v ...interface{}) { _ = "STUB: not implemented"; return }
 
 // PrintMyName returns the caller information for the current test.
-func (u *TestUtil) PrintMyName() string {
-	return u.GetCallerInfo()
-}
+func (u *TestUtil) PrintMyName() string { _ = "STUB: not implemented"; return "" }
 
 // Run runs a subtest with the given name and function.
 // It is only available when the underlying testing object is *testing.T.
-func (u *TestUtil) Run(name string, f func(tt *TestUtil)) {
-	u.reporter.Helper()
-	t := u.requireTestingT("Run")
-	if t == nil {
-		return
-	}
-	t.Run(name, func(t *testing.T) {
-		f(NewTest(t))
-	})
-}
+func (u *TestUtil) Run(name string, f func(tt *TestUtil)) { _ = "STUB: not implemented"; return }
 
 // T returns the underlying *testing.T object.
 // It fails immediately if TestUtil was not created from *testing.T.
-func (u *TestUtil) T() *testing.T {
-	return u.requireTestingT("T")
-}
+func (u *TestUtil) T() *testing.T { _ = "STUB: not implemented"; return nil }
 
 // IsNil asserts that the actual value is nil.
 func (u *TestUtil) IsNil(actual interface{}, exit ...bool) bool {
-	if isNilValue(actual) {
-		return true
-	}
-	return u.failAssertion(exit,
-		"%s 期待:nil - 结果:%v (type %s)",
-		u.PrintMyName(), actual, valueType(actual),
-	)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // NotNil asserts that the actual value is not nil.
 func (u *TestUtil) NotNil(actual interface{}, exit ...bool) bool {
-	if !isNilValue(actual) {
-		return true
-	}
-	return u.failAssertion(exit, "%s 期待非 nil (type %s)", u.PrintMyName(), valueType(actual))
+	_ = "STUB: not implemented"
+	return false
 }
 
 // Parallel marks the test as a parallel test.
 // It is only available when the underlying testing object is *testing.T.
-func (u *TestUtil) Parallel() {
-	u.reporter.Helper()
-	t := u.requireTestingT("Parallel")
-	if t == nil {
-		return
-	}
-	t.Parallel()
-}
+func (u *TestUtil) Parallel() { _ = "STUB: not implemented"; return }
 
 // TestCase represents a test case with a name and arbitrary data.
 type TestCase struct {
@@ -302,13 +165,8 @@ type TestCase struct {
 
 // RunTests runs a series of named test cases through subtests.
 func (u *TestUtil) RunTests(tests []TestCase, testFunc func(tt *TestUtil, tc TestCase)) {
-	u.reporter.Helper()
-	for _, tc := range tests {
-		tc := tc
-		u.Run(tc.Name, func(tt *TestUtil) {
-			testFunc(tt, tc)
-		})
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // ErrorTestCase represents a test case with error expectations.
@@ -324,102 +182,36 @@ func (u *TestUtil) RunErrorTests(
 	tests []ErrorTestCase,
 	testFunc func(input interface{}) (interface{}, error),
 ) {
-	u.reporter.Helper()
-	for _, tc := range tests {
-		tc := tc
-		u.Run(tc.Name, func(tt *TestUtil) {
-			result, err := testFunc(tc.Input)
-			if tc.WantErr {
-				tt.Error(err, true)
-				return
-			}
-			if !tt.NoError(err, true) {
-				return
-			}
-			tt.Equal(tc.Expected, result)
-		})
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // failAssertion reports an assertion failure and respects exit behavior.
 func (u *TestUtil) failAssertion(exit []bool, format string, args ...interface{}) bool {
-	u.reporter.Helper()
-	if shouldExit(exit) {
-		u.reporter.Fatalf(format, args...)
-		return false
-	}
-	u.reporter.Errorf(format, args...)
+	_ = "STUB: not implemented"
 	return false
 }
 
 // requireTestingT returns the underlying *testing.T when available.
-func (u *TestUtil) requireTestingT(method string) *testing.T {
-	t, ok := u.tb.(*testing.T)
-	if ok {
-		return t
-	}
-	u.reporter.Helper()
-	u.reporter.Fatalf("%s 仅支持 *testing.T，当前类型:%T", method, u.tb)
-	return nil
-}
+func (u *TestUtil) requireTestingT(method string) *testing.T { _ = "STUB: not implemented"; return nil }
 
 // shouldExit reports whether the assertion should stop the test.
-func shouldExit(exit []bool) bool {
-	return len(exit) > 0 && exit[0]
-}
+func shouldExit(exit []bool) bool { _ = "STUB: not implemented"; return false }
 
 // valueType returns the reflected type name of v.
-func valueType(v interface{}) string {
-	t := reflect.TypeOf(v)
-	if t == nil {
-		return "<nil>"
-	}
-	return t.String()
-}
+func valueType(v interface{}) string { _ = "STUB: not implemented"; return "" }
 
 // valuesEqual compares two values with reflect.DeepEqual.
-func valuesEqual(expected, actual interface{}) bool {
-	return reflect.DeepEqual(expected, actual)
-}
+func valuesEqual(expected, actual interface{}) bool { _ = "STUB: not implemented"; return false }
 
 // isNilValue reports whether v is nil or a typed nil value.
-func isNilValue(v interface{}) bool {
-	if v == nil {
-		return true
-	}
-	rv := reflect.ValueOf(v)
-	switch rv.Kind() {
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map,
-		reflect.Pointer, reflect.Slice, reflect.UnsafePointer:
-		return rv.IsNil()
-	default:
-		return false
-	}
-}
+func isNilValue(v interface{}) bool { _ = "STUB: not implemented"; return false }
 
 // lengthOf returns the length of supported collection values.
-func lengthOf(v interface{}) (int, bool) {
-	rv := reflect.ValueOf(v)
-	if !rv.IsValid() {
-		return 0, false
-	}
-	switch rv.Kind() {
-	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
-		return rv.Len(), true
-	default:
-		return 0, false
-	}
-}
+func lengthOf(v interface{}) (int, bool) { _ = "STUB: not implemented"; return 0, false }
 
 // catchPanic runs fn and captures any panic value.
 func catchPanic(fn func()) (panicked bool, recovered interface{}) {
-	panicked = true
-
-	defer func() {
-		recovered = recover()
-	}()
-
-	fn()
-	panicked = false
-	return
+	_ = "STUB: not implemented"
+	return false, nil
 }

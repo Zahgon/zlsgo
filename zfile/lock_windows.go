@@ -6,7 +6,6 @@ package zfile
 import (
 	"os"
 	"syscall"
-	"unsafe"
 )
 
 // Windows-specific constants for file locking operations
@@ -36,50 +35,8 @@ var (
 // lockFile acquires an exclusive, non-blocking lock on the given file.
 // On Windows systems, this uses the LockFileEx Win32 API function.
 // Returns errLocked if the file is already locked by another process.
-func lockFile(f *os.File) error {
-	h := syscall.Handle(f.Fd())
-	var ol syscall.Overlapped
-
-	ol.Offset = 0
-	ol.OffsetHigh = 0
-
-	r1, _, err := procLockFileEx.Call(
-		uintptr(h),
-		uintptr(lockfileExclusiveLock|lockfileFailImmediately),
-		0,
-		1,
-		0,
-		uintptr(unsafe.Pointer(&ol)),
-	)
-
-	if r1 == 0 {
-		if e, ok := err.(syscall.Errno); ok && e == errorLockViolation {
-			return errLocked
-		}
-		return &os.PathError{Op: "lock", Path: f.Name(), Err: err}
-	}
-	return nil
-}
+func lockFile(f *os.File) error { _ = "STUB: not implemented"; return nil }
 
 // unlockFile releases a lock previously acquired with lockFile.
 // On Windows systems, this uses the UnlockFileEx Win32 API function.
-func unlockFile(f *os.File) error {
-	h := syscall.Handle(f.Fd())
-	var ol syscall.Overlapped
-
-	ol.Offset = 0
-	ol.OffsetHigh = 0
-
-	r1, _, err := procUnlockFileEx.Call(
-		uintptr(h),
-		0,
-		1,
-		0,
-		uintptr(unsafe.Pointer(&ol)),
-	)
-
-	if r1 == 0 {
-		return &os.PathError{Op: "unlock", Path: f.Name(), Err: err}
-	}
-	return nil
-}
+func unlockFile(f *os.File) error { _ = "STUB: not implemented"; return nil }

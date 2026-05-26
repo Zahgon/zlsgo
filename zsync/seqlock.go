@@ -4,8 +4,6 @@
 package zsync
 
 import (
-	"runtime"
-	"sync/atomic"
 	"unsafe"
 )
 
@@ -19,42 +17,13 @@ type SeqLock[T any] struct {
 }
 
 // NewSeqLock creates a typed sequence lock.
-func NewSeqLock[T any]() *SeqLock[T] { return &SeqLock[T]{} }
+func NewSeqLock[T any]() *SeqLock[T] { _ = "STUB: not implemented"; return nil }
 
 // Write publishes a new value with seqlock semantics.
-func (s *SeqLock[T]) Write(v T) {
-	atomic.AddUint64(&s.seq, 1)
-	nv := new(T)
-	*nv = v
-	atomic.StorePointer(&s.ptr, unsafe.Pointer(nv))
-	atomic.AddUint64(&s.seq, 1)
-}
+func (s *SeqLock[T]) Write(v T) { _ = "STUB: not implemented"; return }
 
 // Read returns a consistent snapshot if the sequence was stable.
 // It may spin briefly under write contention.
-func (s *SeqLock[T]) Read() (T, bool) {
-	var zero T
-	for spin := 0; ; spin++ {
-		seq1 := atomic.LoadUint64(&s.seq)
-		if seq1&1 != 0 { // writer active
-			if spin&15 == 15 {
-				runtime.Gosched()
-			}
-			continue
-		}
-		p := atomic.LoadPointer(&s.ptr)
-		if p == nil {
-			if seq1 == atomic.LoadUint64(&s.seq) {
-				return zero, false
-			}
-			continue
-		}
-		v := *(*T)(p)
-		if seq1 == atomic.LoadUint64(&s.seq) {
-			return v, true
-		}
-		if spin&15 == 15 {
-			runtime.Gosched()
-		}
-	}
-}
+func (s *SeqLock[T]) Read() (T, bool) { _ = "STUB: not implemented"; return *new(T), false }
+
+// writer active

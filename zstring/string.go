@@ -2,12 +2,7 @@
 package zstring
 
 import (
-	"bytes"
 	"regexp"
-	"strings"
-	"unicode"
-	"unicode/utf8"
-	"unsafe"
 )
 
 type (
@@ -36,266 +31,94 @@ var letterBytes = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR
 // The padType parameter controls where padding is added (left, right, or both sides).
 // If the string is already longer than the specified length, it is returned unchanged.
 func Pad(raw string, length int, padStr string, padType PadType) string {
-	l := length - Len(raw)
-	if l <= 0 || padStr == "" {
-		return raw
-	}
-
-	// Use builder for better performance
-	var b strings.Builder
-	b.Grow(length * len(padStr))
-
-	switch padType {
-	case PadRight:
-		b.WriteString(raw)
-		b.WriteString(repeatRunesToLength(padStr, l))
-	case PadLeft:
-		b.WriteString(repeatRunesToLength(padStr, l))
-		b.WriteString(raw)
-	default: // PadSides
-		left := l / 2
-		right := l - left
-		padding := repeatRunesToLength(padStr, l)
-		paddingRunes := []rune(padding)
-		b.WriteString(string(paddingRunes[:left]))
-		b.WriteString(raw)
-		b.WriteString(string(paddingRunes[left : left+right]))
-	}
-	return b.String()
+	_ = "STUB: not implemented"
+	return ""
 }
 
-func repeatRunesToLength(padStr string, length int) string {
-	if length <= 0 || padStr == "" {
-		return ""
-	}
+// Use builder for better performance
 
-	runes := []rune(padStr)
-	if len(runes) == 0 {
-		return ""
-	}
+// PadSides
 
-	var b strings.Builder
-	b.Grow(length * len(padStr))
-
-	for length >= len(runes) {
-		b.WriteString(padStr)
-		length -= len(runes)
-	}
-	if length > 0 {
-		b.WriteString(string(runes[:length]))
-	}
-
-	return b.String()
-}
+func repeatRunesToLength(padStr string, length int) string { _ = "STUB: not implemented"; return "" }
 
 // Len returns the number of characters (runes) in a UTF-8 encoded string.
 // This differs from len(string) which returns the number of bytes.
 func Len(str string) int {
+	_ = "STUB: not implemented"
 	// strings.Count(str,"")-1
-	return utf8.RuneCountInString(str)
+	return 0
 }
 
 // Substr extracts a substring from a UTF-8 encoded string.
 // The start parameter specifies the position of the first character (can be negative to count from the end).
 // The optional length parameter specifies how many characters to include in the result.
-func Substr(str string, start int, length ...int) string {
-	var size, ll, n, nn int
-	if len(length) > 0 {
-		ll = length[0] + start
-	}
-	lb := ll == 0
-	if start < 0 {
-		start = Len(str) + start
-	}
-	for i := 0; i < len(str); i++ {
-		_, size = utf8.DecodeRuneInString(str[nn:])
-		if i < start {
-			n += size
-		} else if lb {
-			break
-		}
-		if !lb && i < ll {
-			nn += size
-		} else if lb {
-			nn += size
-		}
-	}
-	if !lb {
-		return str[n:nn]
-	}
-	return str[n:]
-}
+func Substr(str string, start int, length ...int) string { _ = "STUB: not implemented"; return "" }
 
 // Bytes2String converts a byte slice to a string without memory allocation.
 // Note: This uses unsafe.Pointer and the returned string must not be modified.
-func Bytes2String(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
+func Bytes2String(b []byte) string { _ = "STUB: not implemented"; return "" }
 
 // String2Bytes converts a string to a byte slice without memory allocation.
 // Note: This uses unsafe.Pointer and the returned byte slice must be treated as read-only.
 // Modifying the returned slice may cause undefined behavior as it shares memory with the original string.
-func String2Bytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer(
-		&struct {
-			string
-			Cap int
-		}{s, len(s)},
-	))
-}
+func String2Bytes(s string) []byte { _ = "STUB: not implemented"; return nil }
 
 // Ucfirst capitalizes the first letter of a string, leaving the rest unchanged.
 // Returns an empty string if the input is empty.
-func Ucfirst(str string) string {
-	for i, v := range str {
-		return string(unicode.ToUpper(v)) + str[i+1:]
-	}
-	return ""
-}
+func Ucfirst(str string) string { _ = "STUB: not implemented"; return "" }
 
 // Lcfirst converts the first letter of a string to lowercase, leaving the rest unchanged.
 // Returns an empty string if the input is empty.
-func Lcfirst(str string) string {
-	for i, v := range str {
-		return string(unicode.ToLower(v)) + str[i+1:]
-	}
-	return ""
-}
+func Lcfirst(str string) string { _ = "STUB: not implemented"; return "" }
 
 // IsUcfirst checks if the first letter of a string is uppercase.
 // Returns false if the string is empty or the first character is not a letter.
-func IsUcfirst(str string) bool {
-	if len(str) == 0 {
-		return false
-	}
-	return str[0] >= 'A' && str[0] <= 'Z'
-}
+func IsUcfirst(str string) bool { _ = "STUB: not implemented"; return false }
 
 // IsLcfirst checks if the first letter of a string is lowercase.
 // Returns false if the string is empty or the first character is not a letter.
-func IsLcfirst(str string) bool {
-	if len(str) == 0 {
-		return false
-	}
-	return str[0] >= 'a' && str[0] <= 'z'
-}
+func IsLcfirst(str string) bool { _ = "STUB: not implemented"; return false }
 
 // TrimBOM removes the UTF-8 Byte Order Mark (BOM) from the beginning of a byte slice if present.
 // The BOM is the byte sequence 0xEF,0xBB,0xBF that sometimes appears at the start of UTF-8 encoded files.
-func TrimBOM(fileBytes []byte) []byte {
-	return bytes.TrimPrefix(fileBytes, []byte{0xEF, 0xBB, 0xBF})
-}
+func TrimBOM(fileBytes []byte) []byte { _ = "STUB: not implemented"; return nil }
 
 // SnakeCaseToCamelCase converts a snake_case string to camelCase or PascalCase.
 // Example: "hello_world" becomes "helloWorld" (or "HelloWorld" if ucfirst is true).
 // The optional delimiter parameter specifies the separator character (default is "_").
 func SnakeCaseToCamelCase(str string, ucfirst bool, delimiter ...string) string {
-	if str == "" {
-		return ""
-	}
-	sep := "_"
-	if len(delimiter) > 0 {
-		sep = delimiter[0]
-	}
-	slice := strings.Split(str, sep)
-	for i := range slice {
-		if ucfirst || i > 0 {
-			slice[i] = strings.Title(slice[i])
-		}
-	}
-	return strings.Join(slice, "")
+	_ = "STUB: not implemented"
+	return ""
 }
 
 // CamelCaseToSnakeCase converts a camelCase or PascalCase string to snake_case.
 // Example: "helloWorld" or "HelloWorld" becomes "hello_world".
 // The optional delimiter parameter specifies the separator character (default is "_").
 func CamelCaseToSnakeCase(str string, delimiter ...string) string {
-	if str == "" {
-		return ""
-	}
-	sep := "_"
-	if len(delimiter) > 0 {
-		sep = delimiter[0]
-	}
-	strLen := len(str)
-	var b strings.Builder
-	b.Grow(strLen + strLen/2)
-
-	j := false
-	for i := 0; i < strLen; i++ {
-		char := str[i]
-		if i > 0 && char >= 'A' && char <= 'Z' && j {
-			b.WriteString(sep)
-		}
-		if char != '_' {
-			j = true
-		}
-		b.WriteByte(char)
-	}
-	return strings.ToLower(b.String())
+	_ = "STUB: not implemented"
+	return ""
 }
 
 // XSSClean removes HTML and JavaScript tags from a string to prevent XSS attacks.
 // It removes style tags, script tags, and all other HTML tags, then normalizes whitespace.
-func XSSClean(str string) string {
-	str, _ = RegexReplaceFunc("<[\\S\\s]+?>", str, strings.ToLower)
-	str, _ = RegexReplace("<style[\\S\\s]+?</style>", str, "")
-	str, _ = RegexReplace("<script[\\S\\s]+?</script>", str, "")
-	str, _ = RegexReplace("<[\\S\\s]+?>", str, "")
-	str, _ = RegexReplace("\\s{2,}", str, " ")
-	return strings.TrimSpace(str)
-}
+func XSSClean(str string) string { _ = "STUB: not implemented"; return "" }
 
 var trimLineRegex = regexp.MustCompile(`\s+`)
 
 // TrimLine removes leading and trailing whitespace from each line in a string,
 // and removes empty lines. It preserves the newline characters between non-empty lines.
-func TrimLine(s string) string {
-	str := strings.TrimSpace(trimLineRegex.ReplaceAllString(s, " "))
-	str = strings.Replace(str, " <", "<", -1)
-	str = strings.Replace(str, "> ", ">", -1)
-	return str
-}
+func TrimLine(s string) string { _ = "STUB: not implemented"; return "" }
 
 var space = [...]uint8{127, 128, 133, 160, 194, 226, 227}
 
 // well checks if a byte is one of the special whitespace characters defined in the space array.
 // Used internally by TrimSpace to handle additional Unicode whitespace characters.
-func well(s uint8) bool {
-	for i := range space {
-		if space[i] == s {
-			return true
-		}
-	}
-	return false
-}
+func well(s uint8) bool { _ = "STUB: not implemented"; return false }
 
 // TrimSpace removes all leading and trailing whitespace from a string.
 // Unlike the standard strings.TrimSpace, this function handles additional Unicode whitespace characters.
-func TrimSpace(s string) string {
-	for len(s) > 0 {
-		if (s[0] <= 31) || s[0] <= ' ' || well(s[0]) {
-			s = s[1:]
-			continue
-		}
-		break
-	}
-	for len(s) > 0 {
-		if s[len(s)-1] <= ' ' || (s[len(s)-1] <= 31) || well(s[len(s)-1]) {
-			s = s[:len(s)-1]
-			continue
-		}
-		break
-	}
-	return s
-}
+func TrimSpace(s string) string { _ = "STUB: not implemented"; return "" }
 
 // IsSpace checks if a rune is a whitespace character.
 // This includes standard ASCII whitespace and additional Unicode whitespace characters.
-func IsSpace(r rune) bool {
-	switch r {
-	case '\t', '\v', '\f', '\r', '\n', ' ', 0x85, 0xA0:
-		return true
-	}
-	return false
-}
+func IsSpace(r rune) bool { _ = "STUB: not implemented"; return false }

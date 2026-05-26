@@ -13,20 +13,7 @@ import (
 //
 // It returns any error returned by the callback function, or nil if all iterations complete successfully.
 func ForEachMethod(valof reflect.Value, fn func(index int, method reflect.Method, value reflect.Value) error) error {
-	numMethod := valof.NumMethod()
-	if numMethod == 0 {
-		return nil
-	}
-
-	tp := toRType(NewType(valof))
-	var err error
-	for i := 0; i < numMethod; i++ {
-		err = fn(i, tp.Method(i), valof.Method(i))
-		if err != nil {
-			return err
-		}
-	}
-
+	_ = "STUB: not implemented"
 	return nil
 }
 
@@ -42,48 +29,8 @@ var SkipChild = errors.New("skip struct")
 //
 // It returns any error returned by the callback function, or nil if all iterations complete successfully.
 func ForEach(typ reflect.Type, fn func(parent []string, index int, tag string, field reflect.StructField) error) (err error) {
-	var forField func(typ reflect.Type, parent []string, visited map[reflect.Type]bool) error
-	if typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
-	}
-	forField = func(typ reflect.Type, parent []string, visited map[reflect.Type]bool) error {
-		if visited[typ] {
-			return nil
-		}
-		visited[typ] = true
-		
-		for i := 0; i < typ.NumField(); i++ {
-			field := typ.Field(i)
-			fieldTag, _ := GetStructTag(field)
-
-			err = fn(parent, i, fieldTag, field)
-			if err == SkipChild {
-				continue
-			}
-
-			if err == nil && field.Type.Kind() == reflect.Struct {
-
-				newParent := make([]string, len(parent)+1)
-				copy(newParent, parent)
-				newParent[len(parent)] = fieldTag
-				
-
-				newVisited := make(map[reflect.Type]bool)
-				for k, v := range visited {
-					newVisited[k] = v
-				}
-				
-				err = forField(field.Type, newParent, newVisited)
-			}
-
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	return forField(typ, []string{}, make(map[reflect.Type]bool))
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // ForEachValue iterates through all fields of a struct value recursively and calls the provided function for each field.
@@ -94,55 +41,6 @@ func ForEach(typ reflect.Type, fn func(parent []string, index int, tag string, f
 //
 // It returns any error returned by the callback function, or nil if all iterations complete successfully.
 func ForEachValue(val reflect.Value, fn func(parent []string, index int, tag string, field reflect.StructField, val reflect.Value) error) (err error) {
-	if !Nonzero(val) {
-		return errors.New("reflect.Value is zero")
-	}
-
-	val = reflect.Indirect(val)
-	typ := toRType(NewType(val))
-	var forField func(val reflect.Value, typ reflect.Type, parent []string, visited map[reflect.Type]bool) error
-	forField = func(val reflect.Value, typ reflect.Type, parent []string, visited map[reflect.Type]bool) error {
-		if visited[typ] {
-			return nil
-		}
-		visited[typ] = true
-		
-		for i := 0; i < typ.NumField(); i++ {
-			field := typ.Field(i)
-			fieldValue := val.Field(i)
-			fieldTag, _ := GetStructTag(field)
-
-			if field.PkgPath != "" {
-				continue
-			}
-
-			err = fn(parent, i, fieldTag, field, fieldValue)
-			if err == SkipChild {
-				continue
-			}
-
-			if err == nil && field.Type.Kind() == reflect.Struct {
-
-				newParent := make([]string, len(parent)+1)
-				copy(newParent, parent)
-				newParent[len(parent)] = fieldTag
-				
-
-				newVisited := make(map[reflect.Type]bool)
-				for k, v := range visited {
-					newVisited[k] = v
-				}
-				
-				err = forField(fieldValue, field.Type, newParent, newVisited)
-			}
-
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}
-
-	return forField(val, typ, []string{}, make(map[reflect.Type]bool))
+	_ = "STUB: not implemented"
+	return nil
 }

@@ -5,12 +5,8 @@ package zutil
 
 import (
 	"context"
-	"runtime"
-	"runtime/debug"
 	"sync"
 	"time"
-
-	"github.com/sohaha/zlsgo/zfile"
 )
 
 // MemoryStats holds memory usage statistics.
@@ -55,237 +51,44 @@ type MemoryLimiter struct {
 
 // NewMemoryLimiter creates a new memory limiter with optional configuration.
 func NewMemoryLimiter(opt ...func(cfg *MemoryStatsConfig)) *MemoryLimiter {
-	limit := uint64(50 * zfile.MB)
-	pauseThreshold := 0.85
-	monitorInterval := 10 * time.Second
-	cfg := Optional(MemoryStatsConfig{
-		Limit:           limit,
-		PauseThreshold:  pauseThreshold,
-		MonitorInterval: monitorInterval,
-		EnableGC:        true,
-		SetRuntimeLimit: true,
-	}, opt...)
-
-	if cfg.Limit == 0 {
-		cfg.Limit = limit
-	}
-	if cfg.PauseThreshold <= 0 || cfg.PauseThreshold > 1 {
-		cfg.PauseThreshold = pauseThreshold
-	}
-	if cfg.MonitorInterval < 10*time.Millisecond {
-		cfg.MonitorInterval = monitorInterval
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	ml := &MemoryLimiter{
-		config:  cfg,
-		ctx:     ctx,
-		cancel:  cancel,
-		paused:  false,
-		started: false,
-	}
-
-	if cfg.SetRuntimeLimit {
-		ml.prevLimit = debug.SetMemoryLimit(int64(cfg.Limit))
-		ml.setLimit = true
-	}
-
-	return ml
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Start begins the monitoring goroutine.
 // Returns false if already started or if the limiter was stopped.
-func (ml *MemoryLimiter) Start() bool {
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-
-	if ml.started {
-		return false
-	}
-	if ml.ctx.Err() != nil {
-		return false
-	}
-
-	ml.started = true
-	ml.wg.Add(1)
-	go ml.monitor()
-	return true
-}
+func (ml *MemoryLimiter) Start() bool { _ = "STUB: not implemented"; return false }
 
 // Stop stops the monitoring goroutine and waits for it to exit.
-func (ml *MemoryLimiter) Stop() {
-	ml.cancel()
-	ml.wg.Wait()
-	if ml.setLimit {
-		debug.SetMemoryLimit(ml.prevLimit)
-	}
-}
+func (ml *MemoryLimiter) Stop() { _ = "STUB: not implemented"; return }
 
 // Refresh manually updates statistics and performs a memory check.
-func (ml *MemoryLimiter) Refresh() {
-	ml.updateStats()
-	ml.checkMemoryUsage()
-}
+func (ml *MemoryLimiter) Refresh() { _ = "STUB: not implemented"; return }
 
 // Stats returns a copy of the current memory statistics.
-func (ml *MemoryLimiter) Stats() MemoryStats {
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-	return ml.stats
-}
+func (ml *MemoryLimiter) Stats() MemoryStats { _ = "STUB: not implemented"; return *new(MemoryStats) }
 
 // IsPaused returns whether the limiter is currently in paused state.
-func (ml *MemoryLimiter) IsPaused() bool {
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-	return ml.paused
-}
+func (ml *MemoryLimiter) IsPaused() bool { _ = "STUB: not implemented"; return false }
 
 // UpdateLimit dynamically updates the memory limit.
 // A limit of 0 is ignored.
-func (ml *MemoryLimiter) UpdateLimit(limit uint64) {
-	if limit == 0 {
-		return
-	}
-	ml.mu.Lock()
-	ml.config.Limit = limit
-	setRuntimeLimit := ml.config.SetRuntimeLimit
-	ml.mu.Unlock()
-
-	if setRuntimeLimit {
-		debug.SetMemoryLimit(int64(limit))
-	}
-}
+func (ml *MemoryLimiter) UpdateLimit(limit uint64) { _ = "STUB: not implemented"; return }
 
 // OnPause sets the callback invoked when memory exceeds PauseThreshold.
 // The callback receives the current usage ratio and returns true to continue
 // processing, or false to pause.
-func (ml *MemoryLimiter) OnPause(fn func(ratio float64) bool) {
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-	ml.onPause = fn
-}
+func (ml *MemoryLimiter) OnPause(fn func(ratio float64) bool) { _ = "STUB: not implemented"; return }
 
 // OnStats sets the callback invoked with updated memory statistics.
-func (ml *MemoryLimiter) OnStats(fn func(stats MemoryStats)) {
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-	ml.onStats = fn
-}
+func (ml *MemoryLimiter) OnStats(fn func(stats MemoryStats)) { _ = "STUB: not implemented"; return }
 
-func (ml *MemoryLimiter) monitor() {
-	defer ml.wg.Done()
+func (ml *MemoryLimiter) monitor() { _ = "STUB: not implemented"; return }
 
-	ticker := time.NewTicker(ml.config.MonitorInterval)
-	defer ticker.Stop()
+func (ml *MemoryLimiter) updateStats() { _ = "STUB: not implemented"; return }
 
-	for {
-		select {
-		case <-ml.ctx.Done():
-			return
-		case <-ticker.C:
-			ml.Refresh()
-		}
-	}
-}
+func (ml *MemoryLimiter) checkMemoryUsage() { _ = "STUB: not implemented"; return }
 
-func (ml *MemoryLimiter) updateStats() {
-	var memStats runtime.MemStats
-	runtime.ReadMemStats(&memStats)
+func (ml *MemoryLimiter) runGCUnsafe() { _ = "STUB: not implemented"; return }
 
-	ml.mu.Lock()
-	defer ml.mu.Unlock()
-
-	ml.stats.CurrentUsage = memStats.Alloc
-	if memStats.Alloc > ml.stats.PeakUsage {
-		ml.stats.PeakUsage = memStats.Alloc
-	}
-	ml.stats.NumGC = memStats.NumGC
-	ml.stats.HeapInuse = memStats.HeapInuse
-	ml.stats.HeapSys = memStats.HeapSys
-	ml.stats.PauseTotalNs = memStats.PauseTotalNs
-
-	if ml.lastNumGC != memStats.NumGC {
-		ml.stats.LastGCTime = time.Unix(0, int64(memStats.LastGC))
-		ml.lastNumGC = memStats.NumGC
-	}
-}
-
-func (ml *MemoryLimiter) checkMemoryUsage() {
-	var (
-		onPause     func(ratio float64) bool
-		onStats     func(stats MemoryStats)
-		statsCopy   MemoryStats
-		ratio       float64
-		callOnPause bool
-	)
-
-	ml.mu.Lock()
-	ml.checkID++
-	checkID := ml.checkID
-
-	current := ml.stats.CurrentUsage
-	ratio = float64(current) / float64(ml.config.Limit)
-
-	if ratio > ml.config.PauseThreshold {
-		if ml.config.EnableGC {
-			ml.runGCUnsafe()
-			current = ml.stats.CurrentUsage
-			ratio = float64(current) / float64(ml.config.Limit)
-		}
-
-		onPause = ml.onPause
-		if onPause != nil {
-			callOnPause = true
-		} else {
-			ml.paused = true
-		}
-	} else {
-		if ml.paused && ratio < ml.config.PauseThreshold*0.9 {
-			ml.paused = false
-		}
-	}
-
-	onStats = ml.onStats
-	if onStats != nil {
-		statsCopy = ml.stats
-	}
-	ml.mu.Unlock()
-
-	if callOnPause {
-		shouldPause := !onPause(ratio)
-		ml.mu.Lock()
-		if checkID == ml.checkID {
-			ml.paused = shouldPause
-		}
-		ml.mu.Unlock()
-	}
-
-	if onStats != nil {
-		onStats(statsCopy)
-	}
-}
-
-func (ml *MemoryLimiter) runGCUnsafe() {
-	runtime.GC()
-	ml.updateStatsUnsafe()
-}
-
-func (ml *MemoryLimiter) updateStatsUnsafe() {
-	var memStats runtime.MemStats
-	runtime.ReadMemStats(&memStats)
-
-	ml.stats.CurrentUsage = memStats.Alloc
-	if memStats.Alloc > ml.stats.PeakUsage {
-		ml.stats.PeakUsage = memStats.Alloc
-	}
-	ml.stats.NumGC = memStats.NumGC
-	ml.stats.HeapInuse = memStats.HeapInuse
-	ml.stats.HeapSys = memStats.HeapSys
-	ml.stats.PauseTotalNs = memStats.PauseTotalNs
-
-	if ml.lastNumGC != memStats.NumGC {
-		ml.stats.LastGCTime = time.Unix(0, int64(memStats.LastGC))
-		ml.lastNumGC = memStats.NumGC
-	}
-}
+func (ml *MemoryLimiter) updateStatsUnsafe() { _ = "STUB: not implemented"; return }

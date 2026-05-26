@@ -7,12 +7,4 @@ package zutil
 // This is a generic implementation of the functional options pattern that works with any type.
 // It's useful for configuring structs or other values with optional parameters.
 // Optional applies configuration functions to a value and returns the modified value.
-func Optional[T interface{}](o T, fn ...func(*T)) T {
-	for _, f := range fn {
-		if f == nil {
-			continue
-		}
-		f(&o)
-	}
-	return o
-}
+func Optional[T interface{}](o T, fn ...func(*T)) T { _ = "STUB: not implemented"; return *new(T) }

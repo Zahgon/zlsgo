@@ -1,13 +1,10 @@
 package zlog
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/sohaha/zlsgo/zutil"
-
-	"github.com/sohaha/zlsgo/zstring"
 )
 
 // DisableColor DisableColor
@@ -85,71 +82,22 @@ const (
 )
 
 // OpTextWrap OpTextWrap
-func OpTextWrap(op Op, text string) string {
-	if !isSupportColor() {
-		return text
-	}
-	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", op, text)
-}
+func OpTextWrap(op Op, text string) string { _ = "STUB: not implemented"; return "" }
 
 // ColorBackgroundWrap ColorBackgroundWrap
 func ColorBackgroundWrap(color Color, backgroundColor Color, text string) string {
-	if !isSupportColor() {
-		return text
-	}
-	return fmt.Sprintf("\x1b[%d;%dm%s\x1b[0m", color, backgroundColor+10, text)
+	_ = "STUB: not implemented"
+	return ""
 }
 
 // OutAllColor OutAllColor
-func OutAllColor() {
-	all := zstring.Buffer()
-	colors := GetAllColorText()
-	for k, v := range colors {
-		all.WriteString("\n\nBackground " + k + "\n")
-		for ck, cv := range colors {
-			if cv == v {
-				continue
-			}
-			all.WriteString(ColorBackgroundWrap(cv, v, ck+" => "))
-			all.WriteString(ColorBackgroundWrap(cv, v, OpTextWrap(OpBold, "Bold ")))
-			all.WriteString(ColorBackgroundWrap(cv, v, OpTextWrap(OpUnderscore, "Under")))
-			all.WriteString(ColorBackgroundWrap(cv, v, " | "))
-		}
-		all.WriteString("\n")
-	}
-	fmt.Println(all.String())
-}
+func OutAllColor() { _ = "STUB: not implemented"; return }
 
 // GetAllColorText GetAllColorText
-func GetAllColorText() map[string]Color {
-	return map[string]Color{
-		"ColorBlack":        ColorBlack,
-		"ColorRed":          ColorRed,
-		"ColorGreen":        ColorGreen,
-		"ColorYellow":       ColorYellow,
-		"ColorBlue":         ColorBlue,
-		"ColorMagenta":      ColorMagenta,
-		"ColorCyan":         ColorCyan,
-		"ColorWhite":        ColorWhite,
-		"ColorLightGrey":    ColorLightGrey,
-		"ColorLightRed":     ColorLightRed,
-		"ColorLightGreen":   ColorLightGreen,
-		"ColorLightYellow":  ColorLightYellow,
-		"ColorLightBlue":    ColorLightBlue,
-		"ColorLightMagenta": ColorLightMagenta,
-		"ColorLightCyan":    ColorLightCyan,
-		"ColorLightWhite":   ColorLightWhite,
-		"ColorDefault":      ColorDefault,
-	}
-}
+func GetAllColorText() map[string]Color { _ = "STUB: not implemented"; return nil }
 
 // ColorTextWrap ColorTextWrap
-func ColorTextWrap(color Color, text string) string {
-	if !isSupportColor() {
-		return text
-	}
-	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", color, text)
-}
+func ColorTextWrap(color Color, text string) string { _ = "STUB: not implemented"; return "" }
 
 var supportColor bool
 var isMsystem = os.Getenv("MSYSTEM") != ""
@@ -162,11 +110,6 @@ func init() {
 	supportColor = strings.Contains(term, "xterm") || os.Getenv("ConEmuANSI") == "ON" || os.Getenv("ANSICON") != "" || strings.Contains(term, "256color")
 }
 
-func isSupportColor() bool {
-	return !DisableColor && IsSupportColor()
-}
+func isSupportColor() bool { _ = "STUB: not implemented"; return false }
 
-func TrimAnsi(str string) string {
-	str, _ = zstring.RegexReplace(`\x1b\[[0-9;]*[a-zA-Z]`, str, "")
-	return str
-}
+func TrimAnsi(str string) string { _ = "STUB: not implemented"; return "" }

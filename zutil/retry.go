@@ -1,8 +1,6 @@
 package zutil
 
 import (
-	"errors"
-	"math/rand"
 	"time"
 )
 
@@ -28,70 +26,14 @@ type RetryConf struct {
 // It will retry the function up to 'sum' times or until it succeeds.
 // Additional options can be provided to customize retry behavior.
 func DoRetry(sum int, fn func() error, opt ...func(*RetryConf)) (err error) {
-	o := RetryConf{
-		maxRetry:         sum,
-		Interval:         time.Second,
-		MaxRetryInterval: time.Minute,
-	}
-	for i := range opt {
-		opt[i](&o)
-	}
-
-	err = fn()
-	if err == nil {
-		return
-	}
-
-	if o.maxRetry == 0 {
-		return errors.New("maxRetry must be greater than 0")
-	}
-
-	i, now := 1, time.Now()
-	for ; ; i++ {
-
-		var interval time.Duration
-		if o.BackOffDelay {
-			interval = BackOffDelay(i, o.Interval, o.MaxRetryInterval)
-		} else {
-			interval = o.Interval
-		}
-
-		time.Sleep(interval)
-
-		if o.maxRetry > 0 && i > o.maxRetry {
-			break
-		}
-
-		if o.Timeout > 0 && time.Since(now) > o.Timeout {
-			break
-		}
-
-		err = fn()
-		if err == nil {
-			break
-		}
-	}
-
-	return
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // BackOffDelay calculates the delay duration for exponential backoff retry strategy.
 // It increases the delay exponentially based on the attempt number and adds jitter
 // to prevent synchronized retries in distributed systems.
 func BackOffDelay(attempt int, retryInterval, maxRetryInterval time.Duration) time.Duration {
-	attempt = attempt - 1
-	if attempt < 0 {
-		return 0
-	}
-
-	retryFactor := 1 << uint(attempt)
-	jitter := rand.Float64()
-	waitDuration := time.Duration(retryFactor) * retryInterval
-	waitDuration = waitDuration + time.Duration(jitter*float64(waitDuration))
-
-	if waitDuration > maxRetryInterval {
-		return maxRetryInterval
-	}
-
-	return waitDuration
+	_ = "STUB: not implemented"
+	return *new(time.Duration)
 }

@@ -2,20 +2,10 @@ package znet
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
-	"mime"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 
-	"github.com/sohaha/zlsgo/zfile"
-	"github.com/sohaha/zlsgo/zstring"
 	"github.com/sohaha/zlsgo/zutil"
 )
 
@@ -104,303 +94,99 @@ var (
 
 // renderProcessing handles the common rendering process for all renderer types.
 // It sets the HTTP status code, processes the content, and writes it to the response.
-func (c *Context) renderProcessing(code int32, r Renderer) {
-	if c.stopHandle.Load() && c.prevData.Code.Load() != 0 {
-		return
-	}
-	if code != 0 {
-		c.prevData.Code.Store(code)
-	}
-	c.mu.Lock()
-	c.render = r
-	c.mu.Unlock()
-}
+func (c *Context) renderProcessing(code int32, r Renderer) { _ = "STUB: not implemented"; return }
 
 // Content implements the Renderer interface for renderByte.
 // It returns the raw byte data and sets the appropriate content type.
-func (r *renderByte) Content(c *Context) []byte {
-	if !c.hasContentType() {
-		c.SetContentType(ContentTypePlain)
-	}
-	return r.Data
-}
+func (r *renderByte) Content(c *Context) []byte { _ = "STUB: not implemented"; return nil }
 
 // Content implements the Renderer interface for renderString.
 // It formats the string data using the provided format and arguments.
-func (r *renderString) Content(c *Context) []byte {
-	if r.ContentDate != nil {
-		return r.ContentDate
-	}
-	if !c.hasContentType() {
-		c.SetContentType(ContentTypePlain)
-	}
-	if len(r.Data) > 0 {
-		r.ContentDate = zstring.String2Bytes(fmt.Sprintf(r.Format, r.Data...))
-	} else {
-		r.ContentDate = zstring.String2Bytes(r.Format)
-	}
-	return r.ContentDate
-}
+func (r *renderString) Content(c *Context) []byte { _ = "STUB: not implemented"; return nil }
 
 // Content implements the Renderer interface for renderJSON.
 // It marshals the data to JSON and sets the appropriate content type.
-func (r *renderJSON) Content(c *Context) []byte {
-	if r.ContentDate != nil {
-		return r.ContentDate
-	}
-	c.SetContentType(ContentTypeJSON)
-	r.ContentDate, _ = json.Marshal(r.Data)
-	return r.ContentDate
-}
+func (r *renderJSON) Content(c *Context) []byte { _ = "STUB: not implemented"; return nil }
 
 // Content implements the Renderer interface for renderFile.
 // It reads the file content and sets the appropriate content type based on file extension.
-func (r *renderFile) Content(c *Context) []byte {
-	if !r.FileExist {
-		return []byte{}
-	}
-
-	if r.ContentDate != nil {
-		return r.ContentDate
-	}
-	fType := mime.TypeByExtension(filepath.Ext(r.Data))
-	c.SetContentType(fType)
-	r.ContentDate, _ = ioutil.ReadFile(r.Data)
-	return r.ContentDate
-}
+func (r *renderFile) Content(c *Context) []byte { _ = "STUB: not implemented"; return nil }
 
 // Content implements the Renderer interface for renderHTML.
 // It executes the template with the provided data and returns the rendered HTML.
-func (r *renderHTML) Content(c *Context) []byte {
-	if r.ContentDate != nil {
-		return r.ContentDate
-	}
-	c.SetContentType(ContentTypeHTML)
-	if len(r.Templates) > 0 {
-		var (
-			buf bytes.Buffer
-			err error
-			t   *template.Template
-		)
-		if c.Engine.views != nil {
-			err = c.Engine.views.Render(&buf, r.Templates[0], r.Data)
-		} else {
-			tpl := c.Engine.template
-			if tpl != nil {
-				t = tpl.Get(c.Engine.IsDebug())
-				if t != nil && len(r.FuncMap) == 0 {
-					name := r.Templates[0]
-					err = t.ExecuteTemplate(&buf, name, r.Data)
-					if err == nil {
-						r.ContentDate = buf.Bytes()
-						return r.ContentDate
-					}
-					if !strings.Contains(err.Error(), " is undefined") {
-						Log.Error(err)
-						return r.ContentDate
-					}
-				}
-			}
-			if t, err = templateParse(r.Templates, r.FuncMap); err == nil {
-				err = t.Execute(&buf, r.Data)
-			}
-		}
-
-		if err != nil {
-			Log.Error(err)
-		}
-		r.ContentDate = buf.Bytes()
-	} else {
-		r.ContentDate = zstring.String2Bytes(fmt.Sprint(r.Data))
-	}
-	return r.ContentDate
-}
+func (r *renderHTML) Content(c *Context) []byte { _ = "STUB: not implemented"; return nil }
 
 // Byte writes raw bytes to the response with the given status code.
 // It automatically detects the content type if possible.
-func (c *Context) Byte(code int32, value []byte) {
-	c.renderProcessing(code, &renderByte{Data: value})
-}
+func (c *Context) Byte(code int32, value []byte) { _ = "STUB: not implemented"; return }
 
 // String writes a formatted string to the response with the given status code.
 // It uses fmt.Sprintf-style formatting with the provided values.
 func (c *Context) String(code int32, format string, values ...interface{}) {
-	c.renderProcessing(code, &renderString{Format: format, Data: values})
+	_ = "STUB: not implemented"
+	return
 }
 
-func (r *render) Content(c *Context) (content []byte) {
-	if r.data == nil {
-		return emptyBytes
-	}
+func (r *render) Content(c *Context) (content []byte) { _ = "STUB: not implemented"; return nil }
 
-	buf, ok := r.data.(*bytes.Buffer)
-	if !ok {
-		return emptyBytes
-	}
+func (c *Context) SetContent(data *PrevData) { _ = "STUB: not implemented"; return }
 
-	bufferPool.Put(buf)
+func (c *Context) File(path string) { _ = "STUB: not implemented"; return }
 
-	return buf.Bytes()
-}
-
-func (c *Context) SetContent(data *PrevData) {
-	c.mu.Lock()
-	c.prevData = data
-	c.mu.Unlock()
-}
-
-func (c *Context) File(path string) {
-	path = zfile.RealPath(path)
-	f, err := os.Stat(path)
-	fileExist := err == nil
-	var code int32
-	if fileExist {
-		code = http.StatusOK
-	} else {
-		code = http.StatusNotFound
-	}
-	if fileExist {
-		if !isModified(c, f.ModTime()) {
-			return
-		}
-	}
-	c.renderProcessing(code, &renderFile{Data: path, FileExist: fileExist})
-}
-
-func (c *Context) JSON(code int32, values interface{}) {
-	c.renderProcessing(code, &renderJSON{Data: values})
-}
+func (c *Context) JSON(code int32, values interface{}) { _ = "STUB: not implemented"; return }
 
 // ApiJSON ApiJSON
 func (c *Context) ApiJSON(code int32, msg string, data interface{}) {
-	c.renderProcessing(http.StatusOK, &renderJSON{Data: ApiData{
-		Code: code, Data: data,
-		Msg: msg,
-	}})
+	_ = "STUB: not implemented"
+	return
 }
 
 // HTML export html
-func (c *Context) HTML(code int32, html string) {
-	c.renderProcessing(code, &renderHTML{
-		Data: html,
-	})
-}
+func (c *Context) HTML(code int32, html string) { _ = "STUB: not implemented"; return }
 
 // GetWriter get render writer
 func (c *Context) GetWriter(code int32) io.Writer {
-	if !c.hasContentType() {
-		c.SetContentType(ContentTypeHTML)
-	}
-
-	buf := bufferPool.Get().(*bytes.Buffer)
-	buf.Reset()
-
-	c.renderProcessing(code, &render{
-		data: buf,
-	})
-
-	return buf
+	_ = "STUB: not implemented"
+	return *new(io.Writer)
 }
 
 // Template export tpl
 func (c *Context) Template(code int32, name string, data interface{}, funcMap ...map[string]interface{}) {
-	var fn template.FuncMap
-	if len(funcMap) > 0 {
-		fn = funcMap[0]
-	}
-	c.renderProcessing(code, &renderHTML{
-		Templates: []string{name},
-		Data:      data,
-		FuncMap:   fn,
-	})
+	_ = "STUB: not implemented"
+	return
 }
 
 func (c *Context) Templates(code int32, templates []string, data interface{}, funcMap ...map[string]interface{}) {
-	var fn template.FuncMap
-	if len(funcMap) > 0 {
-		fn = funcMap[0]
-	}
-	c.renderProcessing(code, &renderHTML{
-		Templates: templates,
-		Data:      data,
-		FuncMap:   fn,
-	})
+	_ = "STUB: not implemented"
+	return
 }
 
 // Abort stop executing subsequent handlers
-func (c *Context) Abort(code ...int32) {
-	if c.stopHandle.Load() {
-		return
-	}
-	c.stopHandle.Store(true)
-	if len(code) > 0 {
-		c.prevData.Code.Store(code[0])
-	}
-}
+func (c *Context) Abort(code ...int32) { _ = "STUB: not implemented"; return }
 
 // IsAbort checks if the request handling has been aborted.
 // It returns true if Abort() has been called, false otherwise.
-func (c *Context) IsAbort() bool {
-	return c.stopHandle.Load()
-}
+func (c *Context) IsAbort() bool { _ = "STUB: not implemented"; return false }
 
 // Redirect Redirect
-func (c *Context) Redirect(link string, statusCode ...int32) {
-	c.Writer.Header().Set("Location", c.CompletionLink(link))
-	var code int32
-	if len(statusCode) > 0 {
-		code = statusCode[0]
-	} else {
-		code = http.StatusFound
-	}
-	c.SetStatus(code)
-}
+func (c *Context) Redirect(link string, statusCode ...int32) { _ = "STUB: not implemented"; return }
 
 // SetStatus sets the HTTP status code for the response.
 // It returns the context for method chaining.
-func (c *Context) SetStatus(code int32) *Context {
-	c.prevData.Code.Store(code)
-	return c
-}
+func (c *Context) SetStatus(code int32) *Context { _ = "STUB: not implemented"; return nil }
 
 // SetContentType sets the Content-Type header for the response.
 // It returns the context for method chaining.
 func (c *Context) SetContentType(contentType string) *Context {
-	c.SetHeader("Content-Type", contentType, true)
-	return c
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // hasContentType checks if the Content-Type header has already been set.
 // It returns true if the header exists, false otherwise.
-func (c *Context) hasContentType() bool {
-	r := c.mu.RLock()
-	defer c.mu.RUnlock(r)
-	if _, ok := c.header["Content-Type"]; ok {
-		return true
-	}
-	return false
-}
+func (c *Context) hasContentType() bool { _ = "STUB: not implemented"; return false }
 
 // PrevContent current output content
-func (c *Context) PrevContent() *PrevData {
-	if c.render == nil {
-		return c.prevData
-	}
-	c.prevData.Content = c.render.Content(c)
-	ctype, hasType := c.header["Content-Type"]
-	if hasType {
-		c.prevData.Type = ctype[0]
-	}
-	c.mu.Lock()
-	c.render = nil
-	c.mu.Unlock()
-	return c.prevData
-}
+func (c *Context) PrevContent() *PrevData { _ = "STUB: not implemented"; return nil }
 
-func (t *tpl) Get(debug bool) *template.Template {
-	if !debug || t.pattern == "" {
-		return t.tpl
-	}
-	tpl, _ := template.New("").Funcs(t.templateFuncMap).ParseGlob(t.pattern)
-	return tpl
-}
+func (t *tpl) Get(debug bool) *template.Template { _ = "STUB: not implemented"; return nil }

@@ -9,7 +9,4 @@ import (
 
 // Buffer creates a new empty bytes.Buffer.
 // This implementation is for Go versions prior to 1.10.
-func Buffer(size ...int) *bytes.Buffer {
-	b := bytes.NewBufferString("")
-	return &b
-}
+func Buffer(size ...int) *bytes.Buffer { _ = "STUB: not implemented"; return nil }

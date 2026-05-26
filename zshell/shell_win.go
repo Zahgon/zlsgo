@@ -5,9 +5,7 @@ package zshell
 
 import (
 	"context"
-	"errors"
 	"os/exec"
-	"syscall"
 
 	"github.com/sohaha/zlsgo/zutil"
 )
@@ -18,24 +16,15 @@ var chcp = zutil.Once(func() struct{} {
 })
 
 func RunNewProcess(file string, args []string) (pid int, err error) {
-	return 0, errors.New("windows does not support")
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
 func RunBash(ctx context.Context, command string) (code int, outStr, errStr string, err error) {
-	return ExecCommand(ctx, []string{
-		"cmd",
-		"/C",
-		command,
-	}, nil, nil, nil)
+	_ = "STUB: not implemented"
+	return 0, "", "", nil
 }
 
-func sysProcAttr(cmd *exec.Cmd) *exec.Cmd {
-	if cmd.SysProcAttr == nil {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			// CreationFlags: 0x08000000,
-		}
-	}
+func sysProcAttr(cmd *exec.Cmd) *exec.Cmd { _ = "STUB: not implemented"; return nil }
 
-	cmd.SysProcAttr.HideWindow = true
-	return cmd
-}
+// CreationFlags: 0x08000000,

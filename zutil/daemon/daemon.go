@@ -116,30 +116,14 @@ var (
 // It detects the appropriate service system for the current platform and initializes
 // a service that can be installed, started, stopped, etc.
 func New(i Iface, c *Config) (ServiceIface, error) {
-	if len(c.Name) == 0 {
-		return nil, ErrNameFieldRequired
-	}
-	if system == nil {
-		return nil, ErrNoServiceSystemDetected
-	}
-	return system.New(i, c)
+	_ = "STUB: not implemented"
+	return *new(ServiceIface), nil
 }
 
 // newSystem detects and returns the appropriate service system for the current platform.
-func newSystem() SystemIface {
-	for _, choice := range systemRegistry {
-		if !choice.Detect() {
-			continue
-		}
-		return choice
-	}
-	return nil
-}
+func newSystem() SystemIface { _ = "STUB: not implemented"; return *new(SystemIface) }
 
 // chooseSystem registers the provided service systems and selects the appropriate one
 // for the current platform. This is called during package initialization to set up
 // the available service systems.
-func chooseSystem(a ...SystemIface) {
-	systemRegistry = a
-	system = newSystem()
-}
+func chooseSystem(a ...SystemIface) { _ = "STUB: not implemented"; return }

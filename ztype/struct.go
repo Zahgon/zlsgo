@@ -1,11 +1,7 @@
 package ztype
 
 import (
-	"errors"
 	"reflect"
-	"strings"
-
-	"github.com/sohaha/zlsgo/zreflect"
 )
 
 type (
@@ -34,75 +30,28 @@ const (
 // NewStructFromValue creates a new StruBuilder from an existing struct value.
 // It analyzes the provided struct and copies all its fields to the builder.
 func NewStructFromValue(v interface{}) (*StruBuilder, error) {
-	b := NewStruct()
-	err := b.Merge(v)
-	return b, err
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // NewStruct creates a new StruBuilder for building regular struct types.
-func NewStruct() *StruBuilder {
-	return &StruBuilder{
-		typ:    typeStruct,
-		fields: map[string]*StruField{},
-	}
-}
+func NewStruct() *StruBuilder { _ = "STUB: not implemented"; return nil }
 
 // NewMapStruct creates a new StruBuilder for building map[T]struct types.
 // The key parameter specifies the map key type.
-func NewMapStruct(key interface{}) *StruBuilder {
-	var k reflect.Type
-	if v, ok := key.(reflect.Type); ok {
-		k = v
-	} else {
-		k = reflect.TypeOf(key)
-	}
-	return &StruBuilder{
-		typ:    typeMapStruct,
-		key:    k,
-		fields: map[string]*StruField{},
-	}
-}
+func NewMapStruct(key interface{}) *StruBuilder { _ = "STUB: not implemented"; return nil }
 
 // NewSliceStruct creates a new StruBuilder for building []struct types.
-func NewSliceStruct() *StruBuilder {
-	return &StruBuilder{
-		typ:    typeSliceStruct,
-		fields: map[string]*StruField{},
-	}
-}
+func NewSliceStruct() *StruBuilder { _ = "STUB: not implemented"; return nil }
 
 // Copy copies the configuration from another StruBuilder while preserving the current type.
-func (b *StruBuilder) Copy(v *StruBuilder) *StruBuilder {
-	typ := b.typ
-	val := *v
-	*b = val
-	b.typ = typ
-	return b
-}
+func (b *StruBuilder) Copy(v *StruBuilder) *StruBuilder { _ = "STUB: not implemented"; return nil }
 
-func (b *StruBuilder) String() string {
-	return ToString(b.Interface())
-}
+func (b *StruBuilder) String() string { _ = "STUB: not implemented"; return "" }
 
 // Merge merges fields from one or more struct values into this builder.
 // All provided values must be struct types.
-func (b *StruBuilder) Merge(values ...interface{}) error {
-	for _, value := range values {
-		valueOf := reflect.Indirect(zreflect.ValueOf(value))
-		typeOf := valueOf.Type()
-		if typeOf.Kind() != reflect.Struct {
-			return errors.New("value must be struct")
-		}
-
-		for i := 0; i < valueOf.NumField(); i++ {
-			fval := valueOf.Field(i)
-			ftyp := typeOf.Field(i)
-			b.AddField(ftyp.Name, fval.Interface(), string(ftyp.Tag))
-		}
-	}
-
-	return nil
-}
+func (b *StruBuilder) Merge(values ...interface{}) error { _ = "STUB: not implemented"; return nil }
 
 // func (b *StruBuilder) AddFunc(name string, fieldType interface{}, tag ...string) *StruBuilder {
 // 	reflect.MakeFunc()
@@ -113,124 +62,37 @@ func (b *StruBuilder) Merge(values ...interface{}) error {
 // The fieldType can be a reflect.Type, another StruBuilder, or any value whose type will be used.
 // Optional tag strings will be joined with spaces to form the struct tag.
 func (b *StruBuilder) AddField(name string, fieldType interface{}, tag ...string) *StruBuilder {
-	var t string
-	if len(tag) > 0 {
-		t = strings.Join(tag, " ")
-	}
-	if b.typ == typeStruct {
-		nkey := make([]string, 0, len(b.fieldKeys))
-		for i := range b.fieldKeys {
-			if b.fieldKeys[i] != name {
-				nkey = append(nkey, b.fieldKeys[i])
-			}
-		}
-		b.fieldKeys = append(nkey, name)
-	}
-	b.fields[name] = &StruField{
-		typ: fieldType,
-		tag: t,
-	}
-	return b
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // RemoveField removes a field from the struct being built.
-func (b *StruBuilder) RemoveField(name string) *StruBuilder {
-	delete(b.fields, name)
-	if b.typ == typeStruct {
-		nkey := make([]string, 0, len(b.fieldKeys))
-		for i := range b.fieldKeys {
-			if b.fieldKeys[i] != name {
-				nkey = append(nkey, b.fieldKeys[i])
-			}
-		}
-		b.fieldKeys = nkey
-	}
-	return b
-}
+func (b *StruBuilder) RemoveField(name string) *StruBuilder { _ = "STUB: not implemented"; return nil }
 
 // HasField checks if a field with the given name exists in the struct.
-func (b *StruBuilder) HasField(name string) bool {
-	_, ok := b.fields[name]
-	return ok
-}
+func (b *StruBuilder) HasField(name string) bool { _ = "STUB: not implemented"; return false }
 
 // GetField retrieves a field by name. Returns nil if the field doesn't exist.
-func (b *StruBuilder) GetField(name string) *StruField {
-	if !b.HasField(name) {
-		return nil
-	}
-	return b.fields[name]
-}
+func (b *StruBuilder) GetField(name string) *StruField { _ = "STUB: not implemented"; return nil }
 
 // FieldNames returns a slice containing all field names in the struct.
 func (b *StruBuilder) FieldNames() []string {
-	return b.fieldKeys
+	_ = "STUB: not implemented"
+
+	// Interface returns the built struct as an interface{}.
+	return nil
 }
 
-// Interface returns the built struct as an interface{}.
-func (b *StruBuilder) Interface() interface{} {
-	return b.Value().Interface()
-}
+func (b *StruBuilder) Interface() interface{} { _ = "STUB: not implemented"; return nil }
 
 // Type returns the reflect.Type of the built struct.
-func (b *StruBuilder) Type() reflect.Type {
-	var fields []reflect.StructField
-	fn := func(name string, field *StruField) {
-		var t reflect.Type
-		switch v := field.typ.(type) {
-		case *StruBuilder:
-			t = v.Type()
-		case reflect.Type:
-			t = v
-		default:
-			t = reflect.TypeOf(field.typ)
-		}
-
-		fields = append(fields, reflect.StructField{
-			Name: name,
-			Type: t,
-			Tag:  reflect.StructTag(field.tag),
-		})
-	}
-	if b.typ == typeStruct {
-		for i := range b.fieldKeys {
-			name := b.fieldKeys[i]
-			if field, ok := b.fields[name]; ok {
-				fn(name, field)
-			}
-		}
-	} else {
-		for name := range b.fields {
-			field := b.fields[name]
-			fn(name, field)
-		}
-	}
-
-	typ := reflect.StructOf(fields)
-
-	switch b.typ {
-	case typeSliceStruct:
-		return reflect.SliceOf(typ)
-	case typeMapStruct:
-		return reflect.MapOf(b.key, typ)
-	default:
-		return typ
-	}
-}
+func (b *StruBuilder) Type() reflect.Type { _ = "STUB: not implemented"; return *new(reflect.Type) }
 
 // Value returns a new reflect.Value of the built struct type.
-func (b *StruBuilder) Value() reflect.Value {
-	return reflect.New(b.Type())
-}
+func (b *StruBuilder) Value() reflect.Value { _ = "STUB: not implemented"; return *new(reflect.Value) }
 
 // SetType sets the type of this field.
-func (f *StruField) SetType(typ interface{}) *StruField {
-	f.typ = typ
-	return f
-}
+func (f *StruField) SetType(typ interface{}) *StruField { _ = "STUB: not implemented"; return nil }
 
 // SetTag sets the struct tag for this field.
-func (f *StruField) SetTag(tag string) *StruField {
-	f.tag = tag
-	return f
-}
+func (f *StruField) SetTag(tag string) *StruField { _ = "STUB: not implemented"; return nil }

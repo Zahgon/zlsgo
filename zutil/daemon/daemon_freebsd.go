@@ -1,13 +1,5 @@
 package daemon
 
-import (
-	"context"
-	"fmt"
-	"os"
-	"path/filepath"
-	"text/template"
-)
-
 type (
 	freebsdRcdService struct {
 		i Iface
@@ -30,205 +22,41 @@ func init() {
 	}
 }
 
-func (freebsdSystem) String() string {
-	return version
-}
+func (freebsdSystem) String() string { _ = "STUB: not implemented"; return "" }
 
-func (freebsdSystem) Detect() bool {
-	return true
-}
+func (freebsdSystem) Detect() bool { _ = "STUB: not implemented"; return false }
 
-func (freebsdSystem) Interactive() bool {
-	return interactive
-}
+func (freebsdSystem) Interactive() bool { _ = "STUB: not implemented"; return false }
 
 func (freebsdSystem) New(i Iface, c *Config) (ServiceIface, error) {
-	userService := optionUserServiceDefault
-	if s, ok := c.Options[optionUserService]; ok {
-		userService, _ = s.(bool)
-	}
-
-	if c.Context == nil {
-		c.Context = context.Background()
-	}
-
-	s := &freebsdRcdService{
-		i:           i,
-		Config:      c,
-		userService: userService,
-	}
-	return s, nil
+	_ = "STUB: not implemented"
+	return *new(ServiceIface), nil
 }
 
-func isInteractive() (bool, error) {
-	return os.Getppid() != 1, nil
-}
+func isInteractive() (bool, error) { _ = "STUB: not implemented"; return false, nil }
 
-func (s *freebsdRcdService) Status() string {
-	return "Unknown"
-}
+func (s *freebsdRcdService) Status() string { _ = "STUB: not implemented"; return "" }
 
-func (s *freebsdRcdService) String() string {
-	if len(s.DisplayName) > 0 {
-		return s.DisplayName
-	}
-	return s.Name
-}
+func (s *freebsdRcdService) String() string { _ = "STUB: not implemented"; return "" }
 
 func (s *freebsdRcdService) getServiceFilePath() (string, error) {
-
-	return "/etc/rc.d/" + s.Name, nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
-func (s *freebsdRcdService) Install() error {
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
-	_, err = os.Stat(confPath)
-	if err == nil {
-		return fmt.Errorf("init already exists: %s", confPath)
-	}
+func (s *freebsdRcdService) Install() error { _ = "STUB: not implemented"; return nil }
 
-	if s.userService {
-		//  ~/Library/LaunchAgents exists.
-		err = os.MkdirAll(filepath.Dir(confPath), 0700)
-		if err != nil {
-			return err
-		}
-	}
+//  ~/Library/LaunchAgents exists.
 
-	f, err := os.Create(confPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func (s *freebsdRcdService) Uninstall() error { _ = "STUB: not implemented"; return nil }
 
-	keepAlive := optionKeepAliveDefault
-	if v, ok := s.Options[optionKeepAlive]; ok {
-		keepAlive, _ = v.(bool)
-	}
-	load := isServiceRestart(s.Config)
-	sessionCreate := optionSessionCreateDefault
-	if v, ok := s.Options[optionSessionCreate]; ok {
-		sessionCreate, _ = v.(bool)
-	}
+func (s *freebsdRcdService) Start() error { _ = "STUB: not implemented"; return nil }
 
-	path := s.execPath()
-	to := &struct {
-		*Config
-		Path string
+func (s *freebsdRcdService) Stop() error { _ = "STUB: not implemented"; return nil }
 
-		KeepAlive, RunAtLoad bool
-		SessionCreate        bool
-	}{
-		Config:        s.Config,
-		Path:          path,
-		KeepAlive:     keepAlive,
-		RunAtLoad:     load,
-		SessionCreate: sessionCreate,
-	}
+func (s *freebsdRcdService) Restart() error { _ = "STUB: not implemented"; return nil }
 
-	functions := template.FuncMap{
-		"bool": func(v bool) string {
-			if v {
-				return "true"
-			}
-			return "false"
-		},
-	}
-
-	rcdScript := ""
-	if s.Name == "opsramp-agent" {
-		rcdScript = rcdScriptOpsrampAgent
-		file, err := os.OpenFile("/etc/rc.conf", os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		data := "opsramp_agent_enable=" + `"` + "YES" + `"`
-		_, _ = fmt.Fprintln(file, data)
-
-	} else if s.Name == "opsramp-shield" {
-		rcdScript = rcdScriptOpsrampShield
-		file, err := os.OpenFile("/etc/rc.conf", os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		data := "opsramp_shield_enable=" + `"` + "YES" + `"`
-		_, _ = fmt.Fprintln(file, data)
-
-	} else {
-		rcdScript = rcdScriptAgentUninstall
-		file, err := os.OpenFile("/etc/rc.conf", os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			fmt.Printf("failed opening file: %s\n", err)
-		}
-		defer file.Close()
-		data := "agent_uninstall_enable=" + `"` + "YES" + `"`
-		_, _ = fmt.Fprintln(file, data)
-	}
-
-	t := template.Must(template.New("rcdScript").Funcs(functions).Parse(rcdScript))
-	errExecute := t.Execute(f, to)
-
-	serviceName := "/etc/rc.d/" + s.Name
-	err = os.Chmod(serviceName, 755)
-	if err != nil {
-		return err
-	}
-
-	return errExecute
-}
-
-func (s *freebsdRcdService) Uninstall() error {
-	_ = s.Stop()
-	if s.Name == "opsramp-agent" {
-		_ = run("sed", "-i", "-e", "'/opsramp_agent_enable/d'", "/etc/rc.conf")
-	} else if s.Name == "opsramp-shield" {
-		_ = run("sed", "-i", "-e", "'/opsramp_shield_enable/d'", "/etc/rc.conf")
-	} else {
-		_ = run("sed", "-i", "-e", "'/agent_uninstall_enable/d'", "/etc/rc.conf")
-	}
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
-	return os.Remove(confPath)
-}
-
-func (s *freebsdRcdService) Start() error {
-	return run("service", s.Name, "start")
-}
-func (s *freebsdRcdService) Stop() error {
-	return run("service", s.Name, "stop")
-
-}
-func (s *freebsdRcdService) Restart() error {
-	return run("service", s.Name, "restart")
-
-}
-
-func (s *freebsdRcdService) Run() error {
-	var err error
-
-	err = s.i.Start(s)
-	if err != nil {
-		return err
-	}
-	runWait := func() {
-		select {
-		case <-SingleKillSignal():
-		case <-s.Config.Context.Done():
-		}
-	}
-	if v, ok := s.Options[optionRunWait]; ok {
-		runWait, _ = v.(func())
-	}
-	runWait()
-	return s.i.Stop(s)
-}
+func (s *freebsdRcdService) Run() error { _ = "STUB: not implemented"; return nil }
 
 const rcdScriptOpsrampAgent = `. /etc/rc.subr
 

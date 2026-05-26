@@ -1,9 +1,7 @@
 package cron
 
 import (
-	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -129,9 +127,7 @@ var (
 	}
 )
 
-func atoi(s string) int {
-	return numberTokens[s]
-}
+func atoi(s string) int { _ = "STUB: not implemented"; return 0 }
 
 type fieldDescriptor struct {
 	atoi         func(string) int
@@ -227,686 +223,213 @@ var (
 		"@hourly", "0 0 * * * * *")
 )
 
-func (expr *Expression) secondFieldHandler(s string) error {
-	var err error
-	expr.secondList, err = genericFieldHandler(s, secondDescriptor)
-	return err
-}
+func (expr *Expression) secondFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-func (expr *Expression) minuteFieldHandler(s string) error {
-	var err error
-	expr.minuteList, err = genericFieldHandler(s, minuteDescriptor)
-	return err
-}
+func (expr *Expression) minuteFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-func (expr *Expression) hourFieldHandler(s string) error {
-	var err error
-	expr.hourList, err = genericFieldHandler(s, hourDescriptor)
-	return err
-}
+func (expr *Expression) hourFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-func (expr *Expression) monthFieldHandler(s string) error {
-	var err error
-	expr.monthList, err = genericFieldHandler(s, monthDescriptor)
-	return err
-}
+func (expr *Expression) monthFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-func (expr *Expression) yearFieldHandler(s string) error {
-	var err error
-	expr.yearList, err = genericFieldHandler(s, yearDescriptor)
-	return err
-}
+func (expr *Expression) yearFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
 func genericFieldHandler(s string, desc fieldDescriptor) ([]int, error) {
-	directives, err := genericFieldParse(s, desc)
-	if err != nil {
-		return nil, err
-	}
-	values := make(map[int]bool)
-	for _, directive := range directives {
-		switch directive.kind {
-		case none:
-			return nil, fmt.Errorf("syntax error in %s field: '%s'", desc.name, s[directive.sbeg:directive.send])
-		case one:
-			populateOne(values, directive.first)
-		case span:
-			populateMany(values, directive.first, directive.last, directive.step)
-		case all:
-			return desc.defaultList, nil
-		}
-	}
-	return toList(values), nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
-func (expr *Expression) dowFieldHandler(s string) error {
-	expr.daysOfWeekRestricted = true
-	expr.daysOfWeek = make(map[int]bool)
-	expr.lastWeekDaysOfWeek = make(map[int]bool)
-	expr.specificWeekDaysOfWeek = make(map[int]bool)
+func (expr *Expression) dowFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-	directives, err := genericFieldParse(s, dowDescriptor)
-	if err != nil {
-		return err
-	}
+// `5L`
 
-	for _, directive := range directives {
-		switch directive.kind {
-		case none:
-			sdirective := s[directive.sbeg:directive.send]
-			snormal := strings.ToLower(sdirective)
-			// `5L`
-			pairs := makeLayoutRegexp(layoutDowOfLastWeek, dowDescriptor.valuePattern).FindStringSubmatchIndex(snormal)
-			if len(pairs) > 0 {
-				populateOne(expr.lastWeekDaysOfWeek, dowDescriptor.atoi(snormal[pairs[2]:pairs[3]]))
-			} else {
-				// `5#3`
-				pairs := makeLayoutRegexp(layoutDowOfSpecificWeek, dowDescriptor.valuePattern).FindStringSubmatchIndex(snormal)
-				if len(pairs) > 0 {
-					populateOne(expr.specificWeekDaysOfWeek, (dowDescriptor.atoi(snormal[pairs[4]:pairs[5]])-1)*7+(dowDescriptor.atoi(snormal[pairs[2]:pairs[3]])%7))
-				} else {
-					return fmt.Errorf("syntax error in day-of-week field: '%s'", sdirective)
-				}
-			}
-		case one:
-			populateOne(expr.daysOfWeek, directive.first)
-		case span:
-			populateMany(expr.daysOfWeek, directive.first, directive.last, directive.step)
-		case all:
-			populateMany(expr.daysOfWeek, directive.first, directive.last, directive.step)
-			expr.daysOfWeekRestricted = false
-		}
-	}
-	return nil
-}
+// `5#3`
 
-func (expr *Expression) domFieldHandler(s string) error {
-	expr.daysOfMonthRestricted = true
-	expr.lastDayOfMonth = false
-	expr.lastWorkdayOfMonth = false
-	expr.daysOfMonth = make(map[int]bool)     // days of month map
-	expr.workdaysOfMonth = make(map[int]bool) // work days of month map
+func (expr *Expression) domFieldHandler(s string) error { _ = "STUB: not implemented"; return nil }
 
-	directives, err := genericFieldParse(s, domDescriptor)
-	if err != nil {
-		return err
-	}
+// days of month map
+// work days of month map
 
-	for _, directive := range directives {
-		switch directive.kind {
-		case none:
-			sdirective := s[directive.sbeg:directive.send]
-			snormal := strings.ToLower(sdirective)
-			// `L`
-			if makeLayoutRegexp(layoutLastDom, domDescriptor.valuePattern).MatchString(snormal) {
-				expr.lastDayOfMonth = true
-			} else {
-				// `LW`
-				if makeLayoutRegexp(layoutLastWorkdom, domDescriptor.valuePattern).MatchString(snormal) {
-					expr.lastWorkdayOfMonth = true
-				} else {
-					// `15W`
-					pairs := makeLayoutRegexp(layoutWorkdom, domDescriptor.valuePattern).FindStringSubmatchIndex(snormal)
-					if len(pairs) > 0 {
-						populateOne(expr.workdaysOfMonth, domDescriptor.atoi(snormal[pairs[2]:pairs[3]]))
-					} else {
-						return fmt.Errorf("syntax error in day-of-month field: '%s'", sdirective)
-					}
-				}
-			}
-		case one:
-			populateOne(expr.daysOfMonth, directive.first)
-		case span:
-			populateMany(expr.daysOfMonth, directive.first, directive.last, directive.step)
-		case all:
-			populateMany(expr.daysOfMonth, directive.first, directive.last, directive.step)
-			expr.daysOfMonthRestricted = false
-		}
-	}
-	return nil
-}
+// `L`
 
-func populateOne(values map[int]bool, v int) {
-	values[v] = true
-}
+// `LW`
 
-func populateMany(values map[int]bool, min, max, step int) {
-	for i := min; i <= max; i += step {
-		values[i] = true
-	}
-}
+// `15W`
 
-func toList(set map[int]bool) []int {
-	list := make([]int, len(set))
-	i := 0
-	for k := range set {
-		list[i] = k
-		i += 1
-	}
-	sort.Ints(list)
-	return list
-}
+func populateOne(values map[int]bool, v int) { _ = "STUB: not implemented"; return }
+
+func populateMany(values map[int]bool, min, max, step int) { _ = "STUB: not implemented"; return }
+
+func toList(set map[int]bool) []int { _ = "STUB: not implemented"; return nil }
 
 func genericFieldParse(s string, desc fieldDescriptor) ([]*cronDirective, error) {
+	_ = "STUB: not implemented"
 	// At least one entry must be present
-	indices := entryFinder.FindAllStringIndex(s, -1)
-	if len(indices) == 0 {
-		return nil, fmt.Errorf("%s field: missing directive", desc.name)
-	}
-
-	directives := make([]*cronDirective, 0, len(indices))
-
-	for i := range indices {
-		directive := cronDirective{
-			sbeg: indices[i][0],
-			send: indices[i][1],
-		}
-		snormal := strings.ToLower(s[indices[i][0]:indices[i][1]])
-
-		// `*`
-		if makeLayoutRegexp(layoutWildcard, desc.valuePattern).MatchString(snormal) {
-			directive.kind = all
-			directive.first = desc.min
-			directive.last = desc.max
-			directive.step = 1
-			directives = append(directives, &directive)
-			continue
-		}
-		// `5`
-		if makeLayoutRegexp(layoutValue, desc.valuePattern).MatchString(snormal) {
-			directive.kind = one
-			directive.first = desc.atoi(snormal)
-			directives = append(directives, &directive)
-			continue
-		}
-		// `5-20`
-		pairs := makeLayoutRegexp(layoutRange, desc.valuePattern).FindStringSubmatchIndex(snormal)
-		if len(pairs) > 0 {
-			directive.kind = span
-			directive.first = desc.atoi(snormal[pairs[2]:pairs[3]])
-			directive.last = desc.atoi(snormal[pairs[4]:pairs[5]])
-			directive.step = 1
-			directives = append(directives, &directive)
-			continue
-		}
-		// `*/2`
-		pairs = makeLayoutRegexp(layoutWildcardAndInterval, desc.valuePattern).FindStringSubmatchIndex(snormal)
-		if len(pairs) > 0 {
-			directive.kind = span
-			directive.first = desc.min
-			directive.last = desc.max
-			directive.step = atoi(snormal[pairs[2]:pairs[3]])
-			if directive.step < 1 || directive.step > desc.max {
-				return nil, fmt.Errorf("invalid interval %s", snormal)
-			}
-			directives = append(directives, &directive)
-			continue
-		}
-		// `5/2`
-		pairs = makeLayoutRegexp(layoutValueAndInterval, desc.valuePattern).FindStringSubmatchIndex(snormal)
-		if len(pairs) > 0 {
-			directive.kind = span
-			directive.first = desc.atoi(snormal[pairs[2]:pairs[3]])
-			directive.last = desc.max
-			directive.step = atoi(snormal[pairs[4]:pairs[5]])
-			if directive.step < 1 || directive.step > desc.max {
-				return nil, fmt.Errorf("invalid interval %s", snormal)
-			}
-			directives = append(directives, &directive)
-			continue
-		}
-		// `5-20/2`
-		pairs = makeLayoutRegexp(layoutRangeAndInterval, desc.valuePattern).FindStringSubmatchIndex(snormal)
-		if len(pairs) > 0 {
-			directive.kind = span
-			directive.first = desc.atoi(snormal[pairs[2]:pairs[3]])
-			directive.last = desc.atoi(snormal[pairs[4]:pairs[5]])
-			directive.step = atoi(snormal[pairs[6]:pairs[7]])
-			if directive.step < 1 || directive.step > desc.max {
-				return nil, fmt.Errorf("invalid interval %s", snormal)
-			}
-			directives = append(directives, &directive)
-			continue
-		}
-		// No behavior for this one, let caller deal with it
-		directive.kind = none
-		directives = append(directives, &directive)
-	}
-	return directives, nil
+	return nil, nil
 }
 
-func makeLayoutRegexp(layout, value string) *regexp.Regexp {
-	layoutRegexpLock.Lock()
-	defer layoutRegexpLock.Unlock()
+// `*`
 
-	layout = strings.Replace(layout, `%value%`, value, -1)
-	re := layoutRegexp[layout]
-	if re == nil {
-		re = regexp.MustCompile(layout)
-		layoutRegexp[layout] = re
-	}
-	return re
-}
+// `5`
+
+// `5-20`
+
+// `*/2`
+
+// `5/2`
+
+// `5-20/2`
+
+// No behavior for this one, let caller deal with it
+
+func makeLayoutRegexp(layout, value string) *regexp.Regexp { _ = "STUB: not implemented"; return nil }
 
 // ParseNextTime parses a cron expression and calculates the next execution time.
 func ParseNextTime(cronLine string) (nextTime time.Time, err error) {
-	expr, err := Parse(cronLine)
-	if err == nil {
-		nextTime = expr.Next(time.Now())
-	}
-
-	return
+	_ = "STUB: not implemented"
+	return *new(time.Time), nil
 }
 
 // Parse parses a cron expression string, returning an Expression object.
-func Parse(cronLine string) (*Expression, error) {
-	cron := cronNormalizer.Replace(cronLine)
+func Parse(cronLine string) (*Expression, error) { _ = "STUB: not implemented"; return nil, nil }
 
-	indices := fieldFinder.FindAllStringIndex(cron, -1)
-	fieldCount := len(indices)
-	if fieldCount < 5 {
-		return nil, fmt.Errorf("missing field(s)")
-	}
-	// ignore fields beyond 7th
-	if fieldCount > 7 {
-		fieldCount = 7
-	}
+// ignore fields beyond 7th
 
-	expr := Expression{}
-	field := 0
-	var err error
+// second field (optional)
 
-	// second field (optional)
-	if fieldCount == 7 {
-		err = expr.secondFieldHandler(cron[indices[field][0]:indices[field][1]])
-		if err != nil {
-			return nil, err
-		}
-		field += 1
-	} else {
-		expr.secondList = []int{0}
-	}
+// minute field
 
-	// minute field
-	err = expr.minuteFieldHandler(cron[indices[field][0]:indices[field][1]])
-	if err != nil {
-		return nil, err
-	}
-	field += 1
+// hour field
 
-	// hour field
-	err = expr.hourFieldHandler(cron[indices[field][0]:indices[field][1]])
-	if err != nil {
-		return nil, err
-	}
-	field += 1
+// day of month field
 
-	// day of month field
-	err = expr.domFieldHandler(cron[indices[field][0]:indices[field][1]])
-	if err != nil {
-		return nil, err
-	}
-	field += 1
+// month field
 
-	// month field
-	err = expr.monthFieldHandler(cron[indices[field][0]:indices[field][1]])
-	if err != nil {
-		return nil, err
-	}
-	field += 1
+// day of week field
 
-	// day of week field
-	err = expr.dowFieldHandler(cron[indices[field][0]:indices[field][1]])
-	if err != nil {
-		return nil, err
-	}
-	field += 1
-
-	// year field
-	if field < fieldCount {
-		err = expr.yearFieldHandler(cron[indices[field][0]:indices[field][1]])
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		expr.yearList = yearDescriptor.defaultList
-	}
-
-	return &expr, nil
-}
+// year field
 
 // Next returns the next time point after the given time that matches the cron expression.
 func (expr *Expression) Next(fromTime time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Special case
-	if fromTime.IsZero() {
-		return fromTime
-	}
-
-	// year
-	v := fromTime.Year()
-	i := sort.SearchInts(expr.yearList, v)
-	if i == len(expr.yearList) {
-		return time.Time{}
-	}
-	if v != expr.yearList[i] {
-		return expr.nextYear(fromTime)
-	}
-	// month
-	v = int(fromTime.Month())
-	i = sort.SearchInts(expr.monthList, v)
-	if i == len(expr.monthList) {
-		return expr.nextYear(fromTime)
-	}
-	if v != expr.monthList[i] {
-		return expr.nextMonth(fromTime)
-	}
-
-	expr.actualDaysOfMonthList = expr.calculateActualDaysOfMonth(fromTime.Year(), int(fromTime.Month()))
-	if len(expr.actualDaysOfMonthList) == 0 {
-		return expr.nextMonth(fromTime)
-	}
-
-	// day of month
-	v = fromTime.Day()
-	i = sort.SearchInts(expr.actualDaysOfMonthList, v)
-	if i == len(expr.actualDaysOfMonthList) {
-		return expr.nextMonth(fromTime)
-	}
-	if v != expr.actualDaysOfMonthList[i] {
-		return expr.nextDayOfMonth(fromTime)
-	}
-	// hour
-	v = fromTime.Hour()
-	i = sort.SearchInts(expr.hourList, v)
-	if i == len(expr.hourList) {
-		return expr.nextDayOfMonth(fromTime)
-	}
-	if v != expr.hourList[i] {
-		return expr.nextHour(fromTime)
-	}
-	// minute
-	v = fromTime.Minute()
-	i = sort.SearchInts(expr.minuteList, v)
-	if i == len(expr.minuteList) {
-		return expr.nextHour(fromTime)
-	}
-	if v != expr.minuteList[i] {
-		return expr.nextMinute(fromTime)
-	}
-	// second
-	v = fromTime.Second()
-	i = sort.SearchInts(expr.secondList, v)
-	if i == len(expr.secondList) {
-		return expr.nextMinute(fromTime)
-	}
-
-	// If we reach this point, there is nothing better to do
-	// than to move to the next second
-
-	return expr.nextSecond(fromTime)
+	return *new(time.Time)
 }
+
+// year
+
+// month
+
+// day of month
+
+// hour
+
+// minute
+
+// second
+
+// If we reach this point, there is nothing better to do
+// than to move to the next second
 
 // NextN returns n time points after the given time that match the cron expression.
 func (expr *Expression) NextN(fromTime time.Time, n uint) []time.Time {
-	nextTimes := make([]time.Time, 0, n)
-	if n > 0 {
-		fromTime = expr.Next(fromTime)
-		for {
-			if fromTime.IsZero() {
-				break
-			}
-			nextTimes = append(nextTimes, fromTime)
-			n -= 1
-			if n == 0 {
-				break
-			}
-			fromTime = expr.nextSecond(fromTime)
-		}
-	}
-	return nextTimes
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func (expr *Expression) nextYear(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Find index at which item in list is greater or equal to
 	// candidate year
-	i := sort.SearchInts(expr.yearList, t.Year()+1)
-	if i == len(expr.yearList) {
-		return time.Time{}
-	}
-	// Year changed, need to recalculate actual days of month
-	expr.actualDaysOfMonthList = expr.calculateActualDaysOfMonth(expr.yearList[i], expr.monthList[0])
-	if len(expr.actualDaysOfMonthList) == 0 {
-		return expr.nextMonth(time.Date(
-			expr.yearList[i],
-			time.Month(expr.monthList[0]),
-			1,
-			expr.hourList[0],
-			expr.minuteList[0],
-			expr.secondList[0],
-			0,
-			t.Location()))
-	}
-	return time.Date(
-		expr.yearList[i],
-		time.Month(expr.monthList[0]),
-		expr.actualDaysOfMonthList[0],
-		expr.hourList[0],
-		expr.minuteList[0],
-		expr.secondList[0],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
+
+// Year changed, need to recalculate actual days of month
 
 func (expr *Expression) nextMonth(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Find index at which item in list is greater or equal to
 	// candidate month
-	i := sort.SearchInts(expr.monthList, int(t.Month())+1)
-	if i == len(expr.monthList) {
-		return expr.nextYear(t)
-	}
-	// Month changed, need to recalculate actual days of month
-	expr.actualDaysOfMonthList = expr.calculateActualDaysOfMonth(t.Year(), expr.monthList[i])
-	if len(expr.actualDaysOfMonthList) == 0 {
-		return expr.nextMonth(time.Date(
-			t.Year(),
-			time.Month(expr.monthList[i]),
-			1,
-			expr.hourList[0],
-			expr.minuteList[0],
-			expr.secondList[0],
-			0,
-			t.Location()))
-	}
-
-	return time.Date(
-		t.Year(),
-		time.Month(expr.monthList[i]),
-		expr.actualDaysOfMonthList[0],
-		expr.hourList[0],
-		expr.minuteList[0],
-		expr.secondList[0],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
 
+// Month changed, need to recalculate actual days of month
+
 func (expr *Expression) nextDayOfMonth(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Find index at which item in list is greater or equal to
 	// candidate day of month
-	i := sort.SearchInts(expr.actualDaysOfMonthList, t.Day()+1)
-	if i == len(expr.actualDaysOfMonthList) {
-		return expr.nextMonth(t)
-	}
-
-	return time.Date(
-		t.Year(),
-		t.Month(),
-		expr.actualDaysOfMonthList[i],
-		expr.hourList[0],
-		expr.minuteList[0],
-		expr.secondList[0],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
 
 func (expr *Expression) nextHour(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Find index at which item in list is greater or equal to
 	// candidate hour
-	i := sort.SearchInts(expr.hourList, t.Hour()+1)
-	if i == len(expr.hourList) {
-		return expr.nextDayOfMonth(t)
-	}
-
-	return time.Date(
-		t.Year(),
-		t.Month(),
-		t.Day(),
-		expr.hourList[i],
-		expr.minuteList[0],
-		expr.secondList[0],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
 
 func (expr *Expression) nextMinute(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// Find index at which item in list is greater or equal to
 	// candidate minute
-	i := sort.SearchInts(expr.minuteList, t.Minute()+1)
-	if i == len(expr.minuteList) {
-		return expr.nextHour(t)
-	}
-
-	return time.Date(
-		t.Year(),
-		t.Month(),
-		t.Day(),
-		t.Hour(),
-		expr.minuteList[i],
-		expr.secondList[0],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
 
 func (expr *Expression) nextSecond(t time.Time) time.Time {
+	_ = "STUB: not implemented"
 	// nextSecond() assumes all other fields are exactly matched
 	// to the cron expression
-
-	// Find index at which item in list is greater or equal to
-	// candidate second
-	i := sort.SearchInts(expr.secondList, t.Second()+1)
-	if i == len(expr.secondList) {
-		return expr.nextMinute(t)
-	}
-
-	return time.Date(
-		t.Year(),
-		t.Month(),
-		t.Day(),
-		t.Hour(),
-		t.Minute(),
-		expr.secondList[i],
-		0,
-		t.Location())
+	return *new(time.Time)
 }
+
+// Find index at which item in list is greater or equal to
+// candidate second
 
 func (expr *Expression) calculateActualDaysOfMonth(year, month int) []int {
-	actualDaysOfMonthMap := make(map[int]bool)
-	firstDayOfMonth := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	lastDayOfMonth := firstDayOfMonth.AddDate(0, 1, -1)
-
-	// As per crontab man page (http://linux.die.net/man/5/crontab#):
-	//  "The day of a command's execution can be specified by two
-	//  "fields - day of month, and day of week. If both fields are
-	//  "restricted (ie, aren't *), the command will be run when
-	//  "either field matches the current time"
-
-	// If both fields are not restricted, all days of the month are a hit
-	if !expr.daysOfMonthRestricted && !expr.daysOfWeekRestricted {
-		return genericDefaultList[1 : lastDayOfMonth.Day()+1]
-	}
-
-	// day-of-month != `*`
-	if expr.daysOfMonthRestricted {
-		// Last day of month
-		if expr.lastDayOfMonth {
-			actualDaysOfMonthMap[lastDayOfMonth.Day()] = true
-		}
-		// Last work day of month
-		if expr.lastWorkdayOfMonth {
-			actualDaysOfMonthMap[workdayOfMonth(lastDayOfMonth, lastDayOfMonth)] = true
-		}
-		// Days of month
-		for v := range expr.daysOfMonth {
-			// Ignore days beyond end of month
-			if v <= lastDayOfMonth.Day() {
-				actualDaysOfMonthMap[v] = true
-			}
-		}
-		// Work days of month
-		// As per Wikipedia: month boundaries are not crossed.
-		for v := range expr.workdaysOfMonth {
-			// Ignore days beyond end of month
-			if v <= lastDayOfMonth.Day() {
-				actualDaysOfMonthMap[workdayOfMonth(firstDayOfMonth.AddDate(0, 0, v-1), lastDayOfMonth)] = true
-			}
-		}
-	}
-
-	// day-of-week != `*`
-	if expr.daysOfWeekRestricted {
-		// How far first sunday is from first day of month
-		offset := 7 - int(firstDayOfMonth.Weekday())
-		// days of week
-		//  offset : (7 - day_of_week_of_1st_day_of_month)
-		//  target : 1 + (7 * week_of_month) + (offset + day_of_week) % 7
-		for v := range expr.daysOfWeek {
-			w := dowNormalizedOffsets[(offset+v)%7]
-			actualDaysOfMonthMap[w[0]] = true
-			actualDaysOfMonthMap[w[1]] = true
-			actualDaysOfMonthMap[w[2]] = true
-			actualDaysOfMonthMap[w[3]] = true
-			if len(w) > 4 && w[4] <= lastDayOfMonth.Day() {
-				actualDaysOfMonthMap[w[4]] = true
-			}
-		}
-		// days of week of specific week in the month
-		//  offset : (7 - day_of_week_of_1st_day_of_month)
-		//  target : 1 + (7 * week_of_month) + (offset + day_of_week) % 7
-		for v := range expr.specificWeekDaysOfWeek {
-			v = 1 + 7*(v/7) + (offset+v)%7
-			if v <= lastDayOfMonth.Day() {
-				actualDaysOfMonthMap[v] = true
-			}
-		}
-		// Last days of week of the month
-		lastWeekOrigin := firstDayOfMonth.AddDate(0, 1, -7)
-		offset = 7 - int(lastWeekOrigin.Weekday())
-		for v := range expr.lastWeekDaysOfWeek {
-			v = lastWeekOrigin.Day() + (offset+v)%7
-			if v <= lastDayOfMonth.Day() {
-				actualDaysOfMonthMap[v] = true
-			}
-		}
-	}
-
-	return toList(actualDaysOfMonthMap)
+	_ = "STUB: not implemented"
+	return nil
 }
 
+// As per crontab man page (http://linux.die.net/man/5/crontab#):
+//  "The day of a command's execution can be specified by two
+//  "fields - day of month, and day of week. If both fields are
+//  "restricted (ie, aren't *), the command will be run when
+//  "either field matches the current time"
+
+// If both fields are not restricted, all days of the month are a hit
+
+// day-of-month != `*`
+
+// Last day of month
+
+// Last work day of month
+
+// Days of month
+
+// Ignore days beyond end of month
+
+// Work days of month
+// As per Wikipedia: month boundaries are not crossed.
+
+// Ignore days beyond end of month
+
+// day-of-week != `*`
+
+// How far first sunday is from first day of month
+
+// days of week
+//  offset : (7 - day_of_week_of_1st_day_of_month)
+//  target : 1 + (7 * week_of_month) + (offset + day_of_week) % 7
+
+// days of week of specific week in the month
+//  offset : (7 - day_of_week_of_1st_day_of_month)
+//  target : 1 + (7 * week_of_month) + (offset + day_of_week) % 7
+
+// Last days of week of the month
+
 func workdayOfMonth(targetDom, lastDom time.Time) int {
+	_ = "STUB: not implemented"
 	// If saturday, then friday
 	// If sunday, then monday
-	dom := targetDom.Day()
-	dow := targetDom.Weekday()
-	if dow == time.Saturday {
-		if dom > 1 {
-			dom -= 1
-		} else {
-			dom += 2
-		}
-	} else if dow == time.Sunday {
-		if dom < lastDom.Day() {
-			dom += 1
-		} else {
-			dom -= 2
-		}
-	}
-	return dom
+	return 0
 }

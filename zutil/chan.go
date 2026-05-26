@@ -48,150 +48,39 @@ const (
 //   - cap == 0: Creates an unbuffered channel (sends block until received)
 //   - cap > 0: Creates a buffered channel with the specified capacity
 //   - cap < 0 or not provided: Creates an unbounded channel (sends never block)
-func NewChan[T any](cap ...int) *Chan[T] {
-	o := conf{
-		typ: unbounded,
-		cap: -1,
-		len: NewUint32(0),
-	}
-
-	if len(cap) > 0 {
-		if cap[0] == 0 {
-			o.cap = int64(0)
-			o.typ = unbuffered
-		} else if cap[0] > 0 {
-			o.cap = int64(cap[0])
-			o.typ = buffered
-		} else {
-			o.cap = int64(-1)
-			o.typ = unbounded
-		}
-	}
-
-	ch := &Chan[T]{conf: o, close: make(chan struct{}), closed: NewBool(false)}
-	switch ch.conf.typ {
-	case unbuffered:
-		ch.in = make(chan T)
-		ch.out = ch.in
-	case buffered:
-		ch.in = make(chan T, ch.conf.cap)
-		ch.out = ch.in
-	case unbounded:
-		ch.in = make(chan T, 16)
-		ch.out = make(chan T, 16)
-		go ch.process()
-	}
-	return ch
-}
+func NewChan[T any](cap ...int) *Chan[T] { _ = "STUB: not implemented"; return nil }
 
 // In returns the send-only channel for sending values.
 // This is the channel that producers should use to send values.
-func (ch *Chan[T]) In() chan<- T { return ch.in }
+func (ch *Chan[T]) In() chan<- T {
+	_ = "STUB: not implemented"
 
-// Out returns the receive-only channel for receiving values.
-// This is the channel that consumers should use to receive values.
-func (ch *Chan[T]) Out() <-chan T { return ch.out }
-
-// Close closes the channel, preventing further sends.
-// For unbounded channels, this will drain the internal queue
-// and ensure all sent values can still be received.
-func (ch *Chan[T]) Close() {
-	if !ch.closed.CAS(false, true) {
-		return
-	}
-	switch ch.conf.typ {
-	case buffered, unbuffered:
-		safeClose(ch.in)
-		close(ch.close)
-	default:
-		safeClose(ch.in)
-		close(ch.close)
-	}
+	// Out returns the receive-only channel for receiving values.
+	// This is the channel that consumers should use to receive values.
+	return nil
 }
+
+func (ch *Chan[T]) Out() <-chan T {
+	_ = "STUB: not implemented"
+
+	// Close closes the channel, preventing further sends.
+	// For unbounded channels, this will drain the internal queue
+	// and ensure all sent values can still be received.
+	return nil
+}
+
+func (ch *Chan[T]) Close() { _ = "STUB: not implemented"; return }
 
 // Len returns the current number of elements in the channel.
 // For unbounded channels, this includes elements in the internal queue
 // as well as the input and output buffers.
-func (ch *Chan[T]) Len() int {
-	switch ch.conf.typ {
-	case buffered, unbuffered:
-		return len(ch.in)
-	default:
-		return int(ch.conf.len.Load()) + len(ch.in) + len(ch.out)
-	}
-}
+func (ch *Chan[T]) Len() int { _ = "STUB: not implemented"; return 0 }
 
 // process is an internal goroutine that handles the unbounded channel behavior.
 // It moves elements from the input channel to the internal queue and then to the output channel.
 // This enables the unbounded behavior where sends never block.
-func (ch *Chan[T]) process() {
-	var nilT T
+func (ch *Chan[T]) process() { _ = "STUB: not implemented"; return }
 
-	ch.q = make([]T, 0, 1<<10)
-	for {
-		select {
-		case e, ok := <-ch.in:
-			if !ok {
-				ch.shutdownUnbounded(false)
-				return
-			}
-			ch.conf.len.Add(1)
-			ch.q = append(ch.q, e)
-		case <-ch.close:
-			ch.shutdownUnbounded(true)
-			return
-		}
+func (ch *Chan[T]) shutdownUnbounded(closeInput bool) { _ = "STUB: not implemented"; return }
 
-		for len(ch.q) > 0 {
-			select {
-			case ch.out <- ch.q[0]:
-				ch.conf.len.Sub(1)
-				ch.q[0] = nilT
-				ch.q = ch.q[1:]
-			case e, ok := <-ch.in:
-				if !ok {
-					ch.shutdownUnbounded(false)
-					return
-				}
-				ch.conf.len.Add(1)
-				ch.q = append(ch.q, e)
-			case <-ch.close:
-				ch.shutdownUnbounded(true)
-				return
-			}
-		}
-		if cap(ch.q) < 1<<5 {
-			ch.q = make([]T, 0, 1<<10)
-		}
-	}
-}
-
-func (ch *Chan[T]) shutdownUnbounded(closeInput bool) {
-	var nilT T
-
-	if closeInput {
-		safeClose(ch.in)
-	}
-
-	for e := range ch.in {
-		ch.q = append(ch.q, e)
-	}
-
-	for len(ch.q) > 0 {
-		ch.out <- ch.q[0]
-		ch.q[0] = nilT
-		ch.q = ch.q[1:]
-	}
-
-	close(ch.out)
-}
-
-func safeClose[T any](ch chan T) {
-	if ch == nil {
-		return
-	}
-	defer func() {
-		_ = recover()
-	}()
-	close(ch)
-}
+func safeClose[T any](ch chan T) { _ = "STUB: not implemented"; return }

@@ -4,6 +4,4 @@
 package zlog
 
 // IsSupportColor IsSupportColor
-func IsSupportColor() bool {
-	return supportColor
-}
+func IsSupportColor() bool { _ = "STUB: not implemented"; return false }

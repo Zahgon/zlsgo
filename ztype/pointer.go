@@ -5,6 +5,4 @@ package ztype
 
 // ToPointer returns a pointer to the given value.
 // This is a generic function that works with any type T.
-func ToPointer[T any](value T) *T {
-	return &value
-}
+func ToPointer[T any](value T) *T { _ = "STUB: not implemented"; return nil }

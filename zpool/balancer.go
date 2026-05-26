@@ -5,13 +5,7 @@ package zpool
 
 import (
 	"errors"
-	"math"
-	"sync/atomic"
-	"time"
 
-	"github.com/sohaha/zlsgo/zarray"
-	"github.com/sohaha/zlsgo/zerror"
-	"github.com/sohaha/zlsgo/zstring"
 	"github.com/sohaha/zlsgo/zsync"
 	"github.com/sohaha/zlsgo/zutil"
 )
@@ -66,7 +60,7 @@ type BalancerNodeOptions struct {
 
 // BalancerNodeInfo contains complete information about a balancer node
 type BalancerNodeInfo[T any] struct {
-	Node      T    // Node data
+	Node      T      // Node data
 	Weight    uint64 // Current weight
 	MaxConns  int64  // Maximum connections
 	Cooldown  int64  // Cooldown period in milliseconds
@@ -75,419 +69,87 @@ type BalancerNodeInfo[T any] struct {
 }
 
 // NewBalancer creates a new load balancer
-func NewBalancer[T any]() *Balancer[T] {
-	return &Balancer[T]{
-		nodes: make(map[string]*balancerNode[T], 8),
-		mu:    zsync.NewRBMutex(),
-	}
-}
+func NewBalancer[T any]() *Balancer[T] { _ = "STUB: not implemented"; return nil }
 
 // Get returns the node with the given key
 func (b *Balancer[T]) Get(key string) (node T, available bool, exists bool) {
-	r := b.mu.RLock()
-	defer b.mu.RUnlock(r)
-
-	n, ok := b.nodes[key]
-	if !ok {
-		var d T
-		return d, false, false
-	}
-
-	failedAt := n.failedAt.Load()
-	isAvailable := !(failedAt > 0 && (time.Now().UnixMilli()-failedAt) <= n.cooldown.Load())
-	return n.node, isAvailable, true
+	_ = "STUB: not implemented"
+	return *new(T), false, false
 }
 
 // GetWeight returns the weight of the node with the given key
 func (b *Balancer[T]) GetWeight(key string) (uint64, bool) {
-	r := b.mu.RLock()
-	defer b.mu.RUnlock(r)
-
-	n, ok := b.nodes[key]
-	if !ok {
-		return 0, false
-	}
-
-	return n.weight.Load(), true
+	_ = "STUB: not implemented"
+	return 0, false
 }
 
 // SetWeight updates the weight of the node with the given key
 func (b *Balancer[T]) SetWeight(key string, weight uint64) error {
-	if weight < 1 || weight > 1000000 {
-		return errors.New("invalid weight: must be between 1 and 1000000")
-	}
-
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	n, ok := b.nodes[key]
-	if !ok {
-		return ErrNodeNotFound
-	}
-
-	n.weight.Store(weight)
+	_ = "STUB: not implemented"
 	return nil
 }
 
 // Add adds a new node to the load balancer
 func (b *Balancer[T]) Add(key string, node T, opt ...func(opts *BalancerNodeOptions)) error {
-	if key == "" {
-		return ErrKeyRequired
-	}
-
-	r := b.mu.RLock()
-	_, exists := b.nodes[key]
-	b.mu.RUnlock(r)
-
-	if exists {
-		return ErrNodeExists
-	}
-
-	o := zutil.Optional(BalancerNodeOptions{
-		Weight:   1,
-		Cooldown: 1000,
-	}, opt...)
-
-	n := &balancerNode[T]{
-		node:     node,
-		max:      o.MaxConns,
-		weight:   zutil.NewUint64(o.Weight),
-		total:    zutil.NewInt64(0),
-		failedAt: zutil.NewInt64(0),
-		cooldown: zutil.NewInt64(o.Cooldown),
-	}
-	b.mu.Lock()
-	if _, exists := b.nodes[key]; exists {
-		b.mu.Unlock()
-		return ErrNodeExists
-	}
-
-	b.nodes[key] = n
-	b.nodeKeys = append(b.nodeKeys, key)
-	b.mu.Unlock()
-
+	_ = "STUB: not implemented"
 	return nil
 }
 
 // Remove removes a node from the load balancer
-func (b *Balancer[T]) Remove(key string) {
-	b.mu.Lock()
-	if _, exists := b.nodes[key]; !exists {
-		b.mu.Unlock()
-		return
-	}
-
-	delete(b.nodes, key)
-
-	for i, k := range b.nodeKeys {
-		if k == key {
-			lastIdx := len(b.nodeKeys) - 1
-			b.nodeKeys[i] = b.nodeKeys[lastIdx]
-			b.nodeKeys = b.nodeKeys[:lastIdx]
-			break
-		}
-	}
-
-	b.mu.Unlock()
-}
+func (b *Balancer[T]) Remove(key string) { _ = "STUB: not implemented"; return }
 
 // Mark marks a node as available or not
-func (b *Balancer[T]) Mark(key string, available bool) {
-	b.mu.Lock()
-	if _, exists := b.nodes[key]; !exists {
-		b.mu.Unlock()
-		return
-	}
-
-	if available {
-		b.nodes[key].failedAt.Store(0)
-	} else {
-		b.nodes[key].failedAt.Store(time.Now().UnixMilli())
-	}
-	b.mu.Unlock()
-}
+func (b *Balancer[T]) Mark(key string, available bool) { _ = "STUB: not implemented"; return }
 
 // getAvailableNodes returns all available nodes
 func (b *Balancer[T]) getAvailableNodes(keys ...string) []*balancerNode[T] {
-	r := b.mu.RLock()
-	nodes := make([]*balancerNode[T], 0, len(b.nodes))
-	now := time.Now().UnixMilli()
-
-	for _, key := range b.nodeKeys {
-		if len(keys) > 0 && !zarray.Contains(keys, key) {
-			continue
-		}
-		node := b.nodes[key]
-		failedAt := node.failedAt.Load()
-
-		if failedAt > 0 && (now-failedAt) <= node.cooldown.Load() {
-			continue
-		}
-
-		if node.max <= 0 || node.total.Load() <= node.max {
-			nodes = append(nodes, node)
-		}
-	}
-	b.mu.RUnlock(r)
-
-	return nodes
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // selectNode selects a node based on the given strategy
 func (b *Balancer[T]) selectNode(nodes []*balancerNode[T], strategy BalancerStrategy) (*balancerNode[T], error) {
-	nodeCount := len(nodes)
-	if nodeCount == 0 {
-		return nil, ErrNoAvailableNodes
-	}
-
-	availableNodes := make([]*balancerNode[T], nodeCount)
-	copy(availableNodes, nodes)
-	currentCount := nodeCount
-	for currentCount > 0 {
-		var selectedNode *balancerNode[T]
-		var selectedIdx int
-
-		if nodeCount == 1 {
-			node := nodes[0]
-			if node.max > 0 && node.total.Load() > node.max {
-				return nil, ErrNoAvailableNodes
-			}
-			node.total.Add(1)
-			return node, nil
-		}
-		switch strategy {
-		case StrategyWeighted:
-			if allSameWeight := allNodesHaveSameWeight(availableNodes[:currentCount]); allSameWeight {
-				selectedIdx = fastRand(currentCount)
-				selectedNode = availableNodes[selectedIdx]
-			} else {
-				weighted := make(map[interface{}]uint32, currentCount)
-				for _, node := range availableNodes[:currentCount] {
-					weighted[node] = uint32(node.weight.Load())
-				}
-				randNode, err := zstring.WeightedRand(weighted)
-				if err != nil {
-					return nil, err
-				}
-				selectedNode = randNode.(*balancerNode[T])
-				for i, node := range availableNodes[:currentCount] {
-					if node == selectedNode {
-						selectedIdx = i
-						break
-					}
-				}
-			}
-		case StrategyRandom:
-			if allSameWeight := allNodesHaveSameWeight(availableNodes[:currentCount]); allSameWeight {
-				selectedIdx = fastRand(currentCount)
-				selectedNode = availableNodes[selectedIdx]
-			} else {
-				weighted := make(map[interface{}]uint32, currentCount)
-				for _, node := range availableNodes[:currentCount] {
-					weighted[node] = uint32(node.weight.Load())
-				}
-				randNode, err := zstring.WeightedRand(weighted)
-				if err != nil {
-					return nil, err
-				}
-				selectedNode = randNode.(*balancerNode[T])
-				for i, node := range availableNodes[:currentCount] {
-					if node == selectedNode {
-						selectedIdx = i
-						break
-					}
-				}
-			}
-
-		case StrategyRoundRobin:
-			idx := atomic.AddUint64(&b.lastNodeIdx, 1)
-			selectedIdx = int(idx % uint64(currentCount))
-			selectedNode = availableNodes[selectedIdx]
-
-		case StrategyLeastConn:
-			minScore := int64(math.MaxInt64)
-			for i, node := range availableNodes[:currentCount] {
-				curr := node.total.Load()
-				score := curr * 100 / int64(node.weight.Load())
-				if score < minScore {
-					minScore = score
-					selectedIdx = i
-				}
-			}
-			selectedNode = availableNodes[selectedIdx]
-		}
-
-		if selectedNode.max > 0 && selectedNode.total.Load() > selectedNode.max {
-			availableNodes[selectedIdx] = availableNodes[currentCount-1]
-			currentCount--
-			continue
-		}
-		selectedNode.total.Add(1)
-		return selectedNode, nil
-	}
-
-	return nil, ErrNoAvailableNodes
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // allNodesHaveSameWeight checks if all nodes have the same weight
 func allNodesHaveSameWeight[T any](nodes []*balancerNode[T]) bool {
-	if len(nodes) <= 1 {
-		return true
-	}
-
-	weight := nodes[0].weight.Load()
-	for i := 1; i < len(nodes); i++ {
-		if nodes[i].weight.Load() != weight {
-			return false
-		}
-	}
-	return true
+	_ = "STUB: not implemented"
+	return false
 }
 
 var rngSeed uint32
 
-func fastRand(n int) int {
-	return int(atomic.AddUint32(&rngSeed, 1) % uint32(n))
-}
+func fastRand(n int) int { _ = "STUB: not implemented"; return 0 }
 
 // Run runs the given function on the selected node
 func (b *Balancer[T]) Run(fn func(node T) (normal bool, err error), strategy ...BalancerStrategy) error {
-	return b.RunByKeys(nil, fn, strategy...)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func (b *Balancer[T]) RunByKeys(keys []string, fn func(node T) (normal bool, err error), strategy ...BalancerStrategy) error {
-	if fn == nil {
-		return ErrEmptyCallback
-	}
-
-	r := b.mu.RLock()
-	if len(b.nodes) == 0 {
-		b.mu.RUnlock(r)
-		return ErrNoNodesAdded
-	}
-	b.mu.RUnlock(r)
-
-	var s BalancerStrategy
-	if len(strategy) > 0 {
-		s = strategy[0]
-	}
-
-	nodes := b.getAvailableNodes(keys...)
-	if len(nodes) == 0 {
-		return ErrNoAvailableNodes
-	}
-
-	err := zutil.DoRetry(len(nodes), func() error {
-		if len(nodes) == 0 {
-			return ErrNoAvailableNodes
-		}
-
-		node, err := b.selectNode(nodes, s)
-		if err != nil {
-			return err
-		}
-
-		if node.max > 0 && node.total.Load() > node.max {
-			nodes = b.getAvailableNodes(keys...)
-			return ErrNoAvailableNodes
-		}
-
-		err = zerror.TryCatch(func() error {
-			normal, callErr := fn(node.node)
-
-			if !normal {
-				node.failedAt.Store(time.Now().UnixMilli())
-			}
-
-			return callErr
-		})
-
-		node.total.Add(-1)
-		if err != nil {
-			nodes = b.getAvailableNodes(keys...)
-			return err
-		}
-
-		return nil
-	}, func(rc *zutil.RetryConf) {
-		// rc.BackOffDelay = true
-		rc.Interval = time.Nanosecond
-	})
-
-	return err
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// rc.BackOffDelay = true
 
 // WalkNodes walks all nodes
 func (b *Balancer[T]) WalkNodes(fn func(node T, available bool) (normal bool)) {
-	keys := b.Keys()
-	now := time.Now().UnixMilli()
-
-	for _, key := range keys {
-		r := b.mu.RLock()
-		n, ok := b.nodes[key]
-		if !ok {
-			b.mu.RUnlock(r)
-			continue
-		}
-
-		failedAt := n.failedAt.Load()
-		available := !(failedAt > 0 && (now-failedAt) <= n.cooldown.Load())
-		node := n.node
-		b.mu.RUnlock(r)
-
-		if !fn(node, available) {
-			if available {
-				if n, ok := b.nodes[key]; ok {
-					n.failedAt.Store(now)
-				}
-			}
-		} else if failedAt > 0 {
-			if n, ok := b.nodes[key]; ok {
-				n.failedAt.Store(0)
-			}
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // Keys returns all node keys
-func (b *Balancer[T]) Keys() []string {
-	r := b.mu.RLock()
-	keys := make([]string, len(b.nodeKeys))
-	copy(keys, b.nodeKeys)
-	b.mu.RUnlock(r)
-	return keys
-}
+func (b *Balancer[T]) Keys() []string { _ = "STUB: not implemented"; return nil }
 
 // Len returns the number of nodes
-func (b *Balancer[T]) Len() int {
-	r := b.mu.RLock()
-	defer b.mu.RUnlock(r)
-	return len(b.nodes)
-}
+func (b *Balancer[T]) Len() int { _ = "STUB: not implemented"; return 0 }
 
 // GetNodeInfo returns complete information about the node with the given key
 func (b *Balancer[T]) GetNodeInfo(key string) (BalancerNodeInfo[T], bool) {
-	r := b.mu.RLock()
-	defer b.mu.RUnlock(r)
-
-	n, ok := b.nodes[key]
-	if !ok {
-		var d BalancerNodeInfo[T]
-		return d, false
-	}
-
-	now := time.Now().UnixMilli()
-	failedAt := n.failedAt.Load()
-	isAvailable := !(failedAt > 0 && (now-failedAt) <= n.cooldown.Load())
-
-	info := BalancerNodeInfo[T]{
-		Node:      n.node,
-		Weight:    n.weight.Load(),
-		MaxConns:  n.max,
-		Cooldown:  n.cooldown.Load(),
-		Available: isAvailable,
-		Active:    n.total.Load(),
-	}
-
-	return info, true
+	_ = "STUB: not implemented"
+	return nil, false
 }

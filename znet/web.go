@@ -4,28 +4,20 @@ package znet
 import (
 	"context"
 	"crypto/tls"
-	"errors"
-	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"reflect"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/sohaha/zlsgo/zdi"
-	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zjson"
 	"github.com/sohaha/zlsgo/zsync"
 	"github.com/sohaha/zlsgo/zutil"
-	"github.com/sohaha/zlsgo/zutil/daemon"
 
 	"github.com/sohaha/zlsgo/zcache"
 	"github.com/sohaha/zlsgo/zlog"
-	"github.com/sohaha/zlsgo/zshell"
 )
 
 type (
@@ -183,380 +175,111 @@ func init() {
 // New creates and initializes a new Engine instance.
 // An optional serverName can be provided to identify this server in logs.
 // The returned Engine is configured with default settings and ready to define routes.
-func New(serverName ...string) *Engine {
-	var name string
-	if len(serverName) > 0 {
-		name = serverName[0]
-	}
-
-	var log *zlog.Logger
-	if name != "" {
-		log = zlog.New("[" + name + "] ")
-	} else {
-		log = zlog.New("[Z] ")
-	}
-
-	log.ResetFlags(zlog.BitTime | zlog.BitLevel)
-	log.SetLogLevel(zlog.LogInfo)
-
-	route := &router{
-		prefix: "/",
-		trees:  make(map[string]*Tree),
-	}
-	r := &Engine{
-		Log:                 log,
-		MaxMultipartMemory:  defaultMultipartMemory,
-		BindTag:             defaultBindTag,
-		BindStructDelimiter: BindStructDelimiter,
-		BindStructSuffix:    BindStructSuffix,
-		router:              route,
-		readTimeout:         0 * time.Second,
-		writeTimeout:        0 * time.Second,
-		webModeName:         ProdMode,
-		webMode:             prodCode,
-		addr:                []addrSt{defaultAddr},
-		templateFuncMap:     template.FuncMap{},
-		injector:            zdi.New(),
-		customRenderings:    make([]reflect.Type, 0),
-		shutdowns:           make([]func(), 0),
-	}
-	r.pool.New = func() interface{} {
-		return r.NewContext(nil, nil)
-	}
-	if _, ok := zservers[name]; ok && name != "" {
-		r.Log.Fatal("serverName: [", name, "] it already exists")
-	}
-	zservers[name] = r
-	return r
-}
+func New(serverName ...string) *Engine { _ = "STUB: not implemented"; return nil }
 
 // WrapFirstMiddleware wraps a handler function to be inserted at the beginning of the middleware chain.
 // This is useful for middleware that must execute before any other middleware.
 func WrapFirstMiddleware(fn Handler) firstHandler {
-	return firstHandler{fn}
+	_ = "STUB: not implemented"
+	return *
+
+	// Server retrieves an existing Engine instance by name.
+	// Returns the Engine and a boolean indicating if it was found.
+	new(firstHandler)
 }
 
-// Server retrieves an existing Engine instance by name.
-// Returns the Engine and a boolean indicating if it was found.
 func Server(serverName ...string) (engine *Engine, ok bool) {
-	name := defaultServerName
-	if len(serverName) > 0 {
-		name = serverName[0]
-	}
-	if engine, ok = zservers[name]; !ok {
-		engine = New(name)
-		engine.Log.Warnf("serverName: %s is not", name)
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, false
 }
 
 // OnShutdown registers a function to be called when the server shuts down.
 // This is useful for cleanup tasks that should run before the program exits.
-func OnShutdown(done func()) {
-	shutdownDone = done
-}
+func OnShutdown(done func()) { _ = "STUB: not implemented"; return }
 
-func (e *Engine) AddShutdown(done func()) {
-	if done == nil {
-		return
-	}
-	e.shutdownMu.Lock()
-	e.shutdowns = append(e.shutdowns, done)
-	e.shutdownMu.Unlock()
-}
+func (e *Engine) AddShutdown(done func()) { _ = "STUB: not implemented"; return }
 
 // SetAddr sets the address for the server to listen on.
 // Optional TLS configuration can be provided for HTTPS support.
-func (e *Engine) SetAddr(addrString string, tlsConfig ...TlsCfg) {
-	e.addr = []addrSt{
-		resolveAddr(addrString, tlsConfig...),
-	}
-}
+func (e *Engine) SetAddr(addrString string, tlsConfig ...TlsCfg) { _ = "STUB: not implemented"; return }
 
 // AddAddr adds an additional address for the server to listen on.
 // This allows the server to listen on multiple ports or interfaces.
-func (e *Engine) AddAddr(addrString string, tlsConfig ...TlsCfg) {
-	e.addr = append(e.addr, resolveAddr(addrString, tlsConfig...))
-}
+func (e *Engine) AddAddr(addrString string, tlsConfig ...TlsCfg) { _ = "STUB: not implemented"; return }
 
 // SetCustomMethodField sets the field name used for HTTP method overriding.
 // This allows clients to use methods like PUT/DELETE in environments that only support GET/POST.
-func (e *Engine) SetCustomMethodField(field string) {
-	e.customMethodType = field
-}
+func (e *Engine) SetCustomMethodField(field string) { _ = "STUB: not implemented"; return }
 
 // Deprecated: If you need to verify if a program is trustworthy, please implement it yourself.
 // CloseHotRestartFileMd5 CloseHotRestartFileMd5
 func CloseHotRestartFileMd5() {
+	_ = "STUB: not implemented"
+
+	// Deprecated: please use SetTemplate()
+	// SetTemplateFuncMap Set Template Func
+	return
 }
 
-// Deprecated: please use SetTemplate()
-// SetTemplateFuncMap Set Template Func
 func (e *Engine) SetTemplateFuncMap(funcMap template.FuncMap) {
-	if e.views == nil {
-		// compatible with the old version at present
-		e.templateFuncMap = funcMap
-		return
-	}
+	_ = "STUB: not implemented"
 
-	if t, ok := e.views.(*htmlEngine); ok {
-		t.SetFuncMap(funcMap)
-	}
+	// compatible with the old version at present
+	return
 }
 
 // Injector returns the dependency injection container used by this Engine.
 // It can be used to register services for use in handlers.
 func (e *Engine) Injector() zdi.TypeMapper {
-	return e.injector
+	_ = "STUB: not implemented"
+
+	// Deprecated: please use SetTemplate()
+	// SetHTMLTemplate Set HTML Template
+	return *new(zdi.TypeMapper)
 }
 
-// Deprecated: please use SetTemplate()
-// SetHTMLTemplate Set HTML Template
-func (e *Engine) SetHTMLTemplate(t *template.Template) {
-	val := &tpl{
-		tpl:             t,
-		templateFuncMap: template.FuncMap{},
-	}
-	e.template = val
-}
+func (e *Engine) SetHTMLTemplate(t *template.Template) { _ = "STUB: not implemented"; return }
 
 // LoadHTMLGlob Load Glob HTML
 // LoadHTMLGlob loads HTML templates from the specified glob pattern.
 // It parses the templates and makes them available for rendering in handlers.
-func (e *Engine) LoadHTMLGlob(pattern string) {
-	if !strings.Contains(pattern, "*") {
-		h := newGoTemplate(e, pattern)
-		e.views = h
-		return
-	}
+func (e *Engine) LoadHTMLGlob(pattern string) { _ = "STUB: not implemented"; return }
 
-	// compatible with the old version at present
-	pattern = zfile.RealPath(pattern)
-	t, err := template.New("").Funcs(e.templateFuncMap).ParseGlob(pattern)
-	if err != nil {
-		e.Log.Fatalf("Template loading failed: %s", err)
-		return
-	}
-	isDebug := e.IsDebug()
-	val := &tpl{
-		pattern:         pattern,
-		tpl:             t,
-		templateFuncMap: template.FuncMap{},
-	}
-	if isDebug {
-		templatesDebug(e, t)
-		val.templateFuncMap = e.templateFuncMap
-	}
-	e.template = val
-}
+// compatible with the old version at present
 
 // SetMode sets the server's operating mode (dev, prod, test, or quiet).
 // This affects logging verbosity and other runtime behaviors.
-func (e *Engine) SetMode(value string) {
-	var level int
-	switch value {
-	case ProdMode, "":
-		level = zlog.LogSuccess
-		e.webMode = prodCode
-	case QuietMode:
-		level = zlog.LogPanic
-		e.webMode = quietCode
-	case DebugMode:
-		level = zlog.LogDump
-		e.webMode = debugCode
-	case TestMode:
-		level = zlog.LogDebug
-		e.webMode = testCode
-	default:
-		e.Log.Panic("web mode unknown: " + value)
-	}
-	if value == "" {
-		value = ProdMode
-	}
-	e.webModeName = value
-	e.Log.SetLogLevel(level)
-}
+func (e *Engine) SetMode(value string) { _ = "STUB: not implemented"; return }
 
 // GetMode returns the current server operating mode as a string.
-func (e *Engine) GetMode() string {
-	switch e.webMode {
-	case prodCode:
-		return ProdMode
-	case quietCode:
-		return QuietMode
-	case debugCode:
-		return DebugMode
-	case testCode:
-		return TestMode
-	default:
-		return "unknown"
-	}
-}
+func (e *Engine) GetMode() string { _ = "STUB: not implemented"; return "" }
 
 // IsDebug returns true if the server is running in debug mode.
-func (e *Engine) IsDebug() bool {
-	return e.webMode > prodCode
-}
+func (e *Engine) IsDebug() bool { _ = "STUB: not implemented"; return false }
 
 // SetTimeout sets the read timeout and optionally the write timeout for the HTTP server.
 // These timeouts help prevent slow client attacks.
 func (e *Engine) SetTimeout(Timeout time.Duration, WriteTimeout ...time.Duration) {
-	if len(WriteTimeout) > 0 {
-		e.writeTimeout = WriteTimeout[0]
-		e.readTimeout = Timeout
-	} else {
-		e.writeTimeout = Timeout
-		e.readTimeout = Timeout
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // StartUp initializes and starts the HTTP server(s) for this Engine.
 // It configures all servers according to the Engine settings and begins listening
 // on all configured addresses. Returns the server instances that were started.
-func (e *Engine) StartUp() []*serverMap {
-	var wg sync.WaitGroup
-	var srvMap sync.Map
-	for _, cfg := range e.addr {
-		wg.Add(1)
+func (e *Engine) StartUp() []*serverMap { _ = "STUB: not implemented"; return nil }
 
-		go func(cfg addrSt, e *Engine) {
-			if e.AllowQuerySemicolons {
-				e.Log.SetIgnoreLog(errURLQuerySemicolon)
-			}
-			errChan := make(chan error, 1)
-			isTls := cfg.Cert != "" || cfg.Config != nil
-			addr := getAddr(cfg.addr)
-			hostname := getHostname(addr, isTls)
-			srv := &http.Server{
-				Addr:         addr,
-				Handler:      e,
-				ReadTimeout:  e.readTimeout,
-				WriteTimeout: e.writeTimeout,
-				// MaxHeaderBytes: 1 << 20,
-				ErrorLog: log.New(e.Log, "", 0),
-			}
-
-			srvMap.Store(addr, &serverMap{e, srv})
-
-			wg.Done()
-
-			if isTls {
-				if cfg.Config != nil {
-					srv.TLSConfig = cfg.Config
-				}
-				if cfg.HTTPAddr != "" {
-					httpAddr := getAddr(cfg.HTTPAddr)
-					go func(e *Engine) {
-						newHostname := "http://" + resolveHostname(httpAddr)
-						e.Log.Success(e.Log.ColorBackgroundWrap(zlog.ColorYellow, zlog.ColorDefault, e.Log.OpTextWrap(zlog.OpBold, "Listen: "+newHostname)))
-						var err error
-						switch processing := cfg.HTTPProcessing.(type) {
-						case string:
-							err = http.ListenAndServe(httpAddr, &tlsRedirectHandler{Domain: processing})
-						case http.Handler:
-							err = http.ListenAndServe(httpAddr, processing)
-						default:
-							err = http.ListenAndServe(httpAddr, e)
-						}
-						e.Log.Errorf("HTTP Listen: %s", err)
-					}(e)
-				}
-			}
-			go func() {
-				if isTls {
-					errChan <- srv.ListenAndServeTLS(cfg.Cert, cfg.Key)
-				} else {
-					errChan <- srv.ListenAndServe()
-				}
-			}()
-
-			select {
-			case err := <-errChan:
-				if err != nil && err != http.ErrServerClosed {
-					e.Log.Fatalf("Listen: %s", err)
-				} else if err != http.ErrServerClosed {
-					e.Log.Info(err)
-				}
-				return
-			default:
-			}
-
-			wrapPid := e.Log.ColorTextWrap(zlog.ColorLightGrey, fmt.Sprintf("Pid: %d", os.Getpid()))
-			wrapMode := ""
-			if e.webMode > 0 {
-				wrapMode = e.Log.ColorTextWrap(zlog.ColorYellow, fmt.Sprintf("%s ", strings.ToUpper(e.webModeName)))
-			}
-			e.Log.Successf("%s %s %s%s", "Listen:", e.Log.ColorTextWrap(zlog.ColorLightGreen, e.Log.OpTextWrap(zlog.OpBold, hostname)), wrapMode, wrapPid)
-
-			err := <-errChan
-			if err != nil && err != http.ErrServerClosed {
-				e.Log.Fatalf("Listen: %s", err)
-			} else if err != http.ErrServerClosed {
-				e.Log.Info(err)
-			}
-		}(cfg, e)
-	}
-
-	wg.Wait()
-
-	srvs := make([]*serverMap, 0)
-	srvMap.Range(func(addr, value interface{}) bool {
-		srvs = append(srvs, value.(*serverMap))
-		return true
-	})
-	return srvs
-}
+// MaxHeaderBytes: 1 << 20,
 
 // Shutdown gracefully stops all running servers.
 // It waits for active connections to complete before shutting down.
 // Returns an error if the shutdown process encounters any issues.
-func Shutdown() error {
-	if !isRunContext.Load() {
-		return errors.New("server was started with custom context, cannot use Shutdown")
-	}
-
-	shutdown(true)
-	return nil
-}
+func Shutdown() error { _ = "STUB: not implemented"; return nil }
 
 // shutdown is the internal implementation of the shutdown process.
 // If sigkill is true, it forces immediate termination rather than waiting
 // for connections to complete gracefully.
-func shutdown(sigkill bool) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	for _, s := range srvs {
-		r := s.engine
-		if sigkill {
-			r.Log.Info("Shutdown server ...")
-		}
-		r.shutdownMu.Lock()
-		shutdowns := append([]func(){}, r.shutdowns...)
-		r.shutdownMu.Unlock()
-		for _, shutdown := range shutdowns {
-			shutdown()
-		}
-		err := s.srv.Shutdown(ctx)
-		if err != nil {
-			if sigkill {
-				r.Log.Error("Timeout forced close")
-			}
-			_ = s.srv.Close()
-		} else {
-			if sigkill {
-				r.Log.Success("Shutdown server done")
-			}
-		}
-		wg.Done()
-	}
-
-	wg.Wait()
-	srvs = srvs[:0:0]
-	if shutdownDone != nil {
-		shutdownDone()
-	}
-}
+func shutdown(sigkill bool) { _ = "STUB: not implemented"; return }
 
 var (
 	srvs []*serverMap
@@ -565,9 +288,7 @@ var (
 
 // Run starts the HTTP server and begins listening for requests.
 // Optional callback functions are called when each server starts, receiving the server name and address.
-func Run(cb ...func(name, addr string)) {
-	RunContext(context.Background(), cb...)
-}
+func Run(cb ...func(name, addr string)) { _ = "STUB: not implemented"; return }
 
 var isRunContext = zutil.NewBool(false)
 
@@ -575,40 +296,11 @@ var isRunContext = zutil.NewBool(false)
 // The provided context can be used to trigger server shutdown.
 // Optional callback functions are called when each server starts.
 func RunContext(ctx context.Context, cb ...func(name, addr string)) {
-	isRunContext.Store(true)
-	defer isRunContext.Store(false)
-
-	for n, e := range zservers {
-		ss := e.StartUp()
-		wg.Add(len(ss))
-		srvs = append(srvs, ss...)
-		if len(cb) == 0 {
-			continue
-		}
-		for _, v := range ss {
-			cb[0](n, v.GetAddr())
-		}
-	}
-
-	select {
-	case <-ctx.Done():
-		shutdown(true)
-	case signal := <-daemon.SingleKillSignal():
-		if !signal && !CloseHotRestart {
-			if err := runNewProcess(); err != nil {
-				Log.Error(err)
-			}
-		}
-
-		shutdown(signal)
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // runNewProcess starts a new process for hot reloading.
 // This is used during graceful restarts to spawn a new server process
 // before shutting down the current one.
-func runNewProcess() error {
-	args := os.Args
-	_, err := zshell.RunNewProcess(args[0], args)
-	return err
-}
+func runNewProcess() error { _ = "STUB: not implemented"; return nil }

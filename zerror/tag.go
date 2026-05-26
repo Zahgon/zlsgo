@@ -19,53 +19,17 @@ const (
 	Unauthorized TagKind = "UNAUTHORIZED"
 )
 
-func (t TagKind) Wrap(err error, text string) error {
-	return With(err, text, WrapTag(t))
-}
-func (t TagKind) Text(text string) error {
-	return &withTag{
-		wrapErr: &Error{errText: &text},
-		tag:     t,
-	}
-}
+func (t TagKind) Wrap(err error, text string) error { _ = "STUB: not implemented"; return nil }
+
+func (t TagKind) Text(text string) error { _ = "STUB: not implemented"; return nil }
 
 type withTag struct {
 	wrapErr error
 	tag     TagKind
 }
 
-func (e *withTag) Error() string {
-	return e.wrapErr.Error()
-}
+func (e *withTag) Error() string { _ = "STUB: not implemented"; return "" }
 
-func WrapTag(tag TagKind) External {
-	return func(err error) error {
-		return &withTag{
-			wrapErr: err,
-			tag:     tag,
-		}
-	}
-}
+func WrapTag(tag TagKind) External { _ = "STUB: not implemented"; return *new(External) }
 
-func GetTag(err error) TagKind {
-	if err == nil {
-		return None
-	}
-
-	for err != nil {
-		if f, ok := err.(*withTag); ok {
-			return f.tag
-		}
-
-		if e, ok := err.(*Error); ok {
-			err = e.wrapErr
-			if err == nil {
-				err = e.err
-			}
-		} else {
-			break
-		}
-	}
-
-	return None
-}
+func GetTag(err error) TagKind { _ = "STUB: not implemented"; return *new(TagKind) }

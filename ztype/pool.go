@@ -33,74 +33,25 @@ var intSlicePool = sync.Pool{
 }
 
 // getMapSlice gets a map slice from object pool
-func getMapSlice() []map[string]interface{} {
-	s := mapSlicePool.Get().([]map[string]interface{})
-	return s[:0]
-}
+func getMapSlice() []map[string]interface{} { _ = "STUB: not implemented"; return nil }
 
 // putMapSlice returns a map slice to object pool
-func putMapSlice(s []map[string]interface{}) {
-	if s == nil || cap(s) > 64 {
-		return
-	}
-
-	for i := range s {
-		s[i] = nil
-	}
-	s = s[:0]
-	mapSlicePool.Put(s)
-}
+func putMapSlice(s []map[string]interface{}) { _ = "STUB: not implemented"; return }
 
 // getStringSlice gets a string slice from object pool
-func getStringSlice() []string {
-	s := stringSlicePool.Get().([]string)
-	return s[:0]
-}
+func getStringSlice() []string { _ = "STUB: not implemented"; return nil }
 
 // putStringSlice returns a string slice to object pool
-func putStringSlice(s []string) {
-	if s == nil || cap(s) > 64 {
-		return
-	}
-	for i := range s {
-		s[i] = ""
-	}
-	s = s[:0]
-	stringSlicePool.Put(s)
-}
+func putStringSlice(s []string) { _ = "STUB: not implemented"; return }
 
 // getInterfaceSlice gets an interface{} slice from object pool
-func getInterfaceSlice() []interface{} {
-	s := interfaceSlicePool.Get().([]interface{})
-	return s[:0]
-}
+func getInterfaceSlice() []interface{} { _ = "STUB: not implemented"; return nil }
 
 // putInterfaceSlice returns an interface{} slice to object pool
-func putInterfaceSlice(s []interface{}) {
-	if s == nil || cap(s) > 64 {
-		return
-	}
-	for i := range s {
-		s[i] = nil
-	}
-	s = s[:0]
-	interfaceSlicePool.Put(s)
-}
+func putInterfaceSlice(s []interface{}) { _ = "STUB: not implemented"; return }
 
 // getIntSlice gets an int slice from object pool
-func getIntSlice() []int {
-	s := intSlicePool.Get().([]int)
-	return s[:0]
-}
+func getIntSlice() []int { _ = "STUB: not implemented"; return nil }
 
 // putIntSlice returns an int slice to object pool
-func putIntSlice(s []int) {
-	if s == nil || cap(s) > 64 {
-		return
-	}
-	for i := range s {
-		s[i] = 0
-	}
-	s = s[:0]
-	intSlicePool.Put(s)
-}
+func putIntSlice(s []int) { _ = "STUB: not implemented"; return }

@@ -1,11 +1,7 @@
 package zlocale
 
 import (
-	"sync/atomic"
-	"time"
-
 	"github.com/sohaha/zlsgo/zsync"
-	"github.com/sohaha/zlsgo/ztime"
 )
 
 // LegacyCacheAdapter implements TemplateCache interface using the original map-based approach
@@ -19,120 +15,35 @@ type LegacyCacheAdapter struct {
 }
 
 // NewLegacyCacheAdapter creates a new legacy map-based cache adapter
-func NewLegacyCacheAdapter(maxSize int) *LegacyCacheAdapter {
-	return &LegacyCacheAdapter{
-		cache:   make(map[string]*TemplateCacheEntry),
-		maxSize: maxSize,
-		mutex:   zsync.NewRBMutex(),
-	}
-}
+func NewLegacyCacheAdapter(maxSize int) *LegacyCacheAdapter { _ = "STUB: not implemented"; return nil }
 
 // Get retrieves a cached template entry by key
 func (l *LegacyCacheAdapter) Get(key string) (*TemplateCacheEntry, bool) {
-	mu := zsync.EnsureRBMutex(&l.mutex)
-	mu.Lock()
-	entry, found := l.cache[key]
-
-	if !found {
-		mu.Unlock()
-		atomic.AddInt64(&l.missCount, 1)
-		return nil, false
-	}
-
-	entry.Accessed = ztime.UnixMicro(ztime.Clock())
-	atomic.AddInt64(&entry.Hits, 1)
-	mu.Unlock()
-	atomic.AddInt64(&l.hitCount, 1)
-	return entry, true
+	_ = "STUB: not implemented"
+	return nil, false
 }
 
 // Set stores a template entry with optional expiration
 func (l *LegacyCacheAdapter) Set(key string, entry *TemplateCacheEntry) {
-	mu := zsync.EnsureRBMutex(&l.mutex)
-	mu.Lock()
-	defer mu.Unlock()
-
-	if l.cache == nil {
-		l.cache = make(map[string]*TemplateCacheEntry)
-	}
-
-	now := ztime.UnixMicro(ztime.Clock())
-	if entry.Created.IsZero() {
-		entry.Created = now
-	}
-	entry.Accessed = now
-	if entry.Hits == 0 {
-		entry.Hits = 1
-	}
-
-	if len(l.cache) >= l.maxSize {
-		var oldestKey string
-		var oldestTime time.Time = now
-
-		for k, v := range l.cache {
-			if v.Accessed.Before(oldestTime) {
-				oldestTime = v.Accessed
-				oldestKey = k
-			}
-		}
-
-		if oldestKey != "" {
-			delete(l.cache, oldestKey)
-		}
-	}
-
-	l.cache[key] = entry
+	_ = "STUB: not implemented"
+	return
 }
 
 // Delete removes a template from the cache
-func (l *LegacyCacheAdapter) Delete(key string) {
-	mu := zsync.EnsureRBMutex(&l.mutex)
-	mu.Lock()
-	defer mu.Unlock()
-	delete(l.cache, key)
-}
+func (l *LegacyCacheAdapter) Delete(key string) { _ = "STUB: not implemented"; return }
 
 // Clear removes all templates from the cache
-func (l *LegacyCacheAdapter) Clear() {
-	mu := zsync.EnsureRBMutex(&l.mutex)
-	mu.Lock()
-	defer mu.Unlock()
-	l.cache = make(map[string]*TemplateCacheEntry)
-}
+func (l *LegacyCacheAdapter) Clear() { _ = "STUB: not implemented"; return }
 
 // Count returns the number of cached templates
-func (l *LegacyCacheAdapter) Count() int {
-	mu := zsync.EnsureRBMutex(&l.mutex)
-	tok := mu.RLock()
-	defer mu.RUnlock(tok)
-	return len(l.cache)
-}
+func (l *LegacyCacheAdapter) Count() int { _ = "STUB: not implemented"; return 0 }
 
 // Stats returns cache statistics
-func (l *LegacyCacheAdapter) Stats() CacheStats {
-	hits := atomic.LoadInt64(&l.hitCount)
-	misses := atomic.LoadInt64(&l.missCount)
-	total := hits + misses
+func (l *LegacyCacheAdapter) Stats() CacheStats { _ = "STUB: not implemented"; return *new(CacheStats) }
 
-	hitRate := 0.0
-	if total > 0 {
-		hitRate = float64(hits) / float64(total)
-	}
+// Legacy adapter doesn't track evictions
 
-	return CacheStats{
-		TotalItems:       l.Count(),
-		HitCount:         hits,
-		MissCount:        misses,
-		HitRate:          hitRate,
-		EvictionCount:    0, // Legacy adapter doesn't track evictions
-		CleanerLevel:     0,
-		IdleDuration:     0,
-		IsCleanerRunning: false,
-		MemoryUsage:      int64(l.Count()) * 1024, // Rough estimate
-	}
-}
+// Rough estimate
 
 // Close cleans up cache resources
-func (l *LegacyCacheAdapter) Close() {
-	l.Clear()
-}
+func (l *LegacyCacheAdapter) Close() { _ = "STUB: not implemented"; return }

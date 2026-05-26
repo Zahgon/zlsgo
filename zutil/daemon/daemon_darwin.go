@@ -1,16 +1,6 @@
 package daemon
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"os"
-	"os/user"
-	"path/filepath"
-	"strings"
-	"text/template"
-	"time"
-
 	"github.com/sohaha/zlsgo/zerror"
 )
 
@@ -27,38 +17,15 @@ const version = "darwin-launchd"
 
 var interactive = false
 
-func (darwinSystem) String() string {
-	return version
-}
+func (darwinSystem) String() string { _ = "STUB: not implemented"; return "" }
 
-func (darwinSystem) Detect() bool {
-	return true
-}
+func (darwinSystem) Detect() bool { _ = "STUB: not implemented"; return false }
 
-func (darwinSystem) Interactive() bool {
-	return interactive
-}
+func (darwinSystem) Interactive() bool { _ = "STUB: not implemented"; return false }
 
 func (darwinSystem) New(i Iface, c *Config) (s ServiceIface, err error) {
-	userService := optionUserServiceDefault
-	if s, ok := c.Options[optionUserService]; ok {
-		userService, _ = s.(bool)
-	}
-
-	if c.Context == nil {
-		c.Context = context.Background()
-	}
-
-	s = &darwinLaunchdService{
-		i:           i,
-		Config:      c,
-		userService: userService,
-	}
-
-	if !userService {
-		err = isSudo()
-	}
-	return s, err
+	_ = "STUB: not implemented"
+	return *new(ServiceIface), nil
 }
 
 func init() {
@@ -68,178 +35,35 @@ func init() {
 	zerror.Panic(err)
 }
 
-func isInteractive() (bool, error) {
-	return os.Getppid() != 1, nil
-}
+func isInteractive() (bool, error) { _ = "STUB: not implemented"; return false, nil }
 
-func (s *darwinLaunchdService) String() string {
-	if len(s.DisplayName) > 0 {
-		return s.DisplayName
-	}
-	return s.Name
-}
+func (s *darwinLaunchdService) String() string { _ = "STUB: not implemented"; return "" }
 
 func (s *darwinLaunchdService) getHomeDir() (string, error) {
-	u, err := user.Current()
-	if err == nil {
-		return u.HomeDir, nil
-	}
-
-	homeDir := os.Getenv("HOME")
-	if homeDir == "" {
-		return "", errors.New("user home directory not found")
-	}
-	return homeDir, nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
 func (s *darwinLaunchdService) getServiceFilePath() (string, error) {
-	if s.userService {
-		homeDir, err := s.getHomeDir()
-		if err != nil {
-			return "", err
-		}
-		return homeDir + "/Library/LaunchAgents/" + s.Name + ".plist", nil
-	}
-	return "/Library/LaunchDaemons/" + s.Name + ".plist", nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
-func (s *darwinLaunchdService) Install() error {
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
-	_, err = os.Stat(confPath)
-	if err == nil {
-		return fmt.Errorf("init already exists: %s", confPath)
-	}
+func (s *darwinLaunchdService) Install() error { _ = "STUB: not implemented"; return nil }
 
-	if s.userService {
-		// ~/Library/LaunchAgents exists
-		err = os.MkdirAll(filepath.Dir(confPath), 0700)
-		if err != nil {
-			return err
-		}
-	}
+// ~/Library/LaunchAgents exists
 
-	f, err := os.Create(confPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func (s *darwinLaunchdService) Uninstall() error { _ = "STUB: not implemented"; return nil }
 
-	keepAlive := optionKeepAliveDefault
-	if v, ok := s.Options[optionKeepAlive]; ok {
-		keepAlive, _ = v.(bool)
-	}
-	load := isServiceRestart(s.Config)
-	sessionCreate := optionSessionCreateDefault
-	if v, ok := s.Options[optionSessionCreate]; ok {
-		sessionCreate, _ = v.(bool)
-	}
+func (s *darwinLaunchdService) Start() error { _ = "STUB: not implemented"; return nil }
 
-	path := s.execPath()
-	to := &struct {
-		*Config
-		Path string
+func (s *darwinLaunchdService) Stop() error { _ = "STUB: not implemented"; return nil }
 
-		KeepAlive, RunAtLoad bool
-		SessionCreate        bool
-	}{
-		Config:        s.Config,
-		Path:          path,
-		KeepAlive:     keepAlive,
-		RunAtLoad:     load,
-		SessionCreate: sessionCreate,
-	}
+func (s *darwinLaunchdService) Status() string { _ = "STUB: not implemented"; return "" }
 
-	functions := template.FuncMap{
-		"bool": func(v bool) string {
-			if v {
-				return "true"
-			}
-			return "false"
-		},
-	}
-	t := template.Must(template.New("launchdConfig").Funcs(functions).Parse(launchdConfig))
-	return t.Execute(f, to)
-}
+func (s *darwinLaunchdService) Restart() error { _ = "STUB: not implemented"; return nil }
 
-func (s *darwinLaunchdService) Uninstall() error {
-	var (
-		err      error
-		confPath string
-	)
-	if err = s.Stop(); err != nil {
-		return err
-	}
-	if confPath, err = s.getServiceFilePath(); err != nil {
-		return err
-	}
-	return os.Remove(confPath)
-}
-
-func (s *darwinLaunchdService) Start() error {
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
-	err = run("launchctl", "load", confPath)
-
-	return err
-}
-
-func (s *darwinLaunchdService) Stop() error {
-	confPath, err := s.getServiceFilePath()
-	if err != nil {
-		return err
-	}
-	_ = run("launchctl", "stop", confPath)
-	for {
-		err = run("launchctl", "unload", confPath)
-		if err == nil || (strings.Contains(err.Error(), "Could not find specified service") || !strings.Contains(err.Error(), "Operation now in progress")) {
-			err = nil
-			break
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-	return err
-}
-
-func (s *darwinLaunchdService) Status() string {
-	res, _ := runGrep(s.Name+"$", "launchctl", "list")
-	if res != "" {
-		return "Running"
-	}
-	return "Stop"
-}
-
-func (s *darwinLaunchdService) Restart() error {
-	err := s.Stop()
-	if err != nil {
-		return err
-	}
-	time.Sleep(50 * time.Millisecond)
-	return s.Start()
-}
-
-func (s *darwinLaunchdService) Run() error {
-	err := s.i.Start(s)
-	if err != nil {
-		return err
-	}
-	runWait := func() {
-		select {
-		case <-SingleKillSignal():
-		case <-s.Config.Context.Done():
-		}
-	}
-	if v, ok := s.Options[optionRunWait]; ok {
-		runWait, _ = v.(func())
-	}
-
-	runWait()
-	return s.i.Stop(s)
-}
+func (s *darwinLaunchdService) Run() error { _ = "STUB: not implemented"; return nil }
 
 var launchdConfig = `<?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"

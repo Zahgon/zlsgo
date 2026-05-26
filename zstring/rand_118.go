@@ -16,6 +16,4 @@ func fastrand() uint32
 
 // RandUint32 returns a pseudorandom uint32 value using the Go runtime's internal
 // random number generator, which is much faster than crypto/rand for non-security-critical uses.
-func RandUint32() uint32 {
-	return fastrand()
-}
+func RandUint32() uint32 { _ = "STUB: not implemented"; return 0 }

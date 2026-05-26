@@ -17,40 +17,18 @@ type AtomicValue[T any] struct {
 
 type wrappedValue[T any] struct{ v T }
 
-func NewValue[T any](v T) *AtomicValue[T] {
-	av := &AtomicValue[T]{}
-	av.v.Store(wrappedValue[T]{v})
-	return av
-}
+func NewValue[T any](v T) *AtomicValue[T] { _ = "STUB: not implemented"; return nil }
 
 // Load returns the value set by the most recent Store.
 // It returns the zero value for T if the value is empty.
-func (v *AtomicValue[T]) Load() T {
-	x := v.v.Load()
-	if x != nil {
-		return x.(wrappedValue[T]).v
-	}
-	var zero T
-	return zero
-}
+func (v *AtomicValue[T]) Load() T { _ = "STUB: not implemented"; return *new(T) }
 
 // Store sets the value of the Value to x.
-func (v *AtomicValue[T]) Store(x T) {
-	v.v.Store(wrappedValue[T]{x})
-}
+func (v *AtomicValue[T]) Store(x T) { _ = "STUB: not implemented"; return }
 
 // Swap stores new into Value and returns the previous value.
 // It returns the zero value for T if the value was not set before.
-func (v *AtomicValue[T]) Swap(x T) (old T) {
-	oldV := v.v.Swap(wrappedValue[T]{x})
-	if oldV != nil {
-		return oldV.(wrappedValue[T]).v
-	}
-	var zero T
-	return zero
-}
+func (v *AtomicValue[T]) Swap(x T) (old T) { _ = "STUB: not implemented"; return *new(T) }
 
 // CAS executes the compare-and-swap operation for the Value.
-func (v *AtomicValue[T]) CAS(oldV, newV T) (swapped bool) {
-	return v.v.CompareAndSwap(wrappedValue[T]{oldV}, wrappedValue[T]{newV})
-}
+func (v *AtomicValue[T]) CAS(oldV, newV T) (swapped bool) { _ = "STUB: not implemented"; return false }

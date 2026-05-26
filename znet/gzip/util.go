@@ -2,7 +2,6 @@ package gzip
 
 import (
 	"compress/gzip"
-	"io/ioutil"
 )
 
 type (
@@ -21,19 +20,6 @@ type (
 	}
 )
 
-func (bp *poolCap) Get() (g *gzip.Writer, err error) {
-	select {
-	case g = <-bp.c:
-	default:
-		g, err = gzip.NewWriterLevel(ioutil.Discard, bp.l)
-	}
+func (bp *poolCap) Get() (g *gzip.Writer, err error) { _ = "STUB: not implemented"; return nil, nil }
 
-	return
-}
-
-func (bp *poolCap) Put(g *gzip.Writer) {
-	select {
-	case bp.c <- g:
-	default:
-	}
-}
+func (bp *poolCap) Put(g *gzip.Writer) { _ = "STUB: not implemented"; return }

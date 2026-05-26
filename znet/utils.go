@@ -1,22 +1,11 @@
 package znet
 
 import (
-	"context"
-	"errors"
 	"html/template"
-	"net"
 	"net/http"
-	"path"
-	"regexp"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/sohaha/zlsgo/zcache"
-	"github.com/sohaha/zlsgo/zdi"
-	"github.com/sohaha/zlsgo/zfile"
-	"github.com/sohaha/zlsgo/zstring"
-	"github.com/sohaha/zlsgo/zutil"
 )
 
 // utils provides utility functions for the znet package.
@@ -56,365 +45,86 @@ var matchCache = zcache.NewFast(func(o *zcache.Options) {
 // a map of the parsed path parameters. It uses a cache to improve performance for
 // frequently accessed routes.
 func (_ utils) URLMatchAndParse(requestURL string, path string) (matchParams map[string]string, ok bool) {
-	var (
-		pattern   string
-		matchName []string
-		regex     *regexp.Regexp
-	)
-	matchParams, ok = make(map[string]string), true
-
-	if v, ok := matchCache.Get(path); ok {
-		m := v.([]string)
-		pattern = m[0]
-		matchName = m[1:]
-	} else {
-		res := strings.Split(path, "/")
-		pattern, matchName = ParsePattern(res, "/")
-		matchCache.Set(path, append([]string{pattern}, matchName...))
-	}
-
-	if pattern == "" {
-		return nil, false
-	}
-
-	// Compile regex to get proper subexpression names
-	if regex == nil {
-		var err error
-		regex, err = regexp.Compile(pattern)
-		if err != nil {
-			return nil, false
-		}
-	}
-
-	rr := regex.FindStringSubmatch(requestURL)
-	if len(rr) == 0 {
-		return nil, false
-	}
-
-	if rr[0] == requestURL {
-		// Use regex's subexpression names for proper named group support
-		subexpNames := regex.SubexpNames()
-		for i, value := range rr[1:] {
-			if i+1 < len(subexpNames) {
-				if name := subexpNames[i+1]; name != "" {
-					matchParams[name] = value
-				} else if i < len(matchName) {
-					// Fallback to parsed names for non-named capture groups
-					matchParams[matchName[i]] = value
-				}
-			}
-		}
-		return
-	}
-
+	_ = "STUB: not implemented"
 	return nil, false
 }
+
+// Compile regex to get proper subexpression names
+
+// Use regex's subexpression names for proper named group support
+
+// Fallback to parsed names for non-named capture groups
 
 // ParsePattern converts a path pattern into a regular expression and extracts
 // parameter names. It handles various parameter formats including :param, *wildcard,
 // and {name:pattern} syntax.
 func ParsePattern(res []string, prefix string) (string, []string) {
-	var (
-		matchName []string
-		pattern   string
-	)
-	l := len(res)
-	for i := 0; i < l; i++ {
-		str := res[i]
-		if str == "" {
-			continue
-		}
-		if strings.HasSuffix(str, "\\") && i < l-1 {
-			res[i+1] = str[:len(str)-1] + "/" + res[i+1]
-			continue
-		}
-		pattern = pattern + prefix
-		strLen := len(str)
-		l := strLen - 1
-		parenCloseIdx := strings.IndexRune(str, ')')
-		parenOpenIdx := strings.IndexRune(str, '(')
-		firstChar := str[0]
-		// TODO Need to optimize
-		if parenOpenIdx != -1 && parenCloseIdx != -1 && !strings.HasPrefix(str, "{") {
-			r, err := regexp.Compile(str)
-			if err != nil {
-				return "", nil
-			}
-			names := r.SubexpNames()
-			matchName = append(matchName, names[1:]...)
-			pattern = pattern + str
-		} else if firstChar == ':' {
-			key := ""
-			if len(str) > 1 {
-				key = str[1:]
-			}
-			if key == "full" {
-				key = allKey
-			}
-			matchName = append(matchName, key)
-			switch key {
-			case idKey:
-				pattern = pattern + "(" + idPattern + ")"
-			case allKey:
-				pattern = pattern + "(" + allPattern + ")"
-			default:
-				pattern = pattern + "(" + defaultPattern + ")"
-			}
-		} else if firstChar == '*' {
-			pattern = pattern + "(" + allPattern + ")"
-			matchName = append(matchName, allKey)
-		} else {
-			braceCloseIdx := strings.IndexRune(str, '}')
-			braceOpenIdx := strings.IndexRune(str, '{')
-			if braceOpenIdx != -1 && braceCloseIdx != -1 {
-				if braceCloseIdx == l && braceOpenIdx == 0 {
-					matchStr := str[1:l]
-					name, expr := parseBracePlaceholder(matchStr)
-					matchName = append(matchName, name)
-					pattern = pattern + "(" + expr + ")"
-				} else {
-					// 处理前缀部分（花括号前的内容）
-					if braceOpenIdx > 0 {
-						p, m := ParsePattern([]string{str[:braceOpenIdx]}, "")
-						if p != "" {
-							pattern = pattern + p
-							matchName = append(matchName, m...)
-						}
-						str = str[braceOpenIdx:]
-						// 重新计算相对索引
-						braceCloseIdx = strings.IndexRune(str, '}')
-						braceOpenIdx = 0
-					}
-					// 处理花括号部分
-					ni := braceCloseIdx - braceOpenIdx
-					if ni > 0 {
-						matchStr := str[1:ni]
-						name, expr := parseBracePlaceholder(matchStr)
-						matchName = append(matchName, name)
-						pattern = pattern + "(" + expr + ")"
-						// 处理后缀部分（花括号后的内容）
-						if ni+1 < len(str) {
-							p, m := ParsePattern([]string{str[ni+1:]}, "")
-							if p != "" {
-								pattern = pattern + p
-								matchName = append(matchName, m...)
-							}
-						}
-					}
-				}
-			} else {
-				pattern = pattern + str
-			}
-		}
-	}
-
-	return pattern, matchName
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
-func parseBracePlaceholder(s string) (string, string) {
-	name := s
-	expr := ""
-	if idx := strings.IndexByte(s, ':'); idx >= 0 {
-		name = s[:idx]
-		expr = s[idx+1:]
-	}
-	if expr == "" {
-		switch name {
-		case idKey:
-			expr = idPattern
-		case "full", allKey:
-			name = allKey
-			expr = allPattern
-		default:
-			expr = defaultPattern
-		}
-	}
-	return name, expr
-}
+// TODO Need to optimize
+
+// 处理前缀部分（花括号前的内容）
+
+// 重新计算相对索引
+
+// 处理花括号部分
+
+// 处理后缀部分（花括号后的内容）
+
+func parseBracePlaceholder(s string) (string, string) { _ = "STUB: not implemented"; return "", "" }
 
 // getAddr normalizes an address string, ensuring it has a port.
 // If no port is specified or the port is 0, it finds an available port.
-func getAddr(addr string) string {
-	if addr == "" {
-		port, _ := Port(0, true)
-		return net.JoinHostPort("", strconv.Itoa(port))
-	}
-
-	host := ""
-	portStr := ""
-	if strings.Contains(addr, ":") {
-		if h, p, err := net.SplitHostPort(addr); err == nil {
-			host = h
-			portStr = p
-		} else if strings.HasPrefix(addr, ":") {
-			portStr = strings.TrimPrefix(addr, ":")
-		} else {
-			parts := strings.Split(addr, ":")
-			if len(parts) >= 2 {
-				host = strings.Join(parts[:len(parts)-1], ":")
-				portStr = parts[len(parts)-1]
-			} else {
-				portStr = addr
-			}
-		}
-	} else {
-		portStr = addr
-	}
-
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		if host == "" && !strings.Contains(addr, ":") {
-			host = addr
-		}
-		port = 0
-	}
-	if port == 0 {
-		port, _ = Port(0, true)
-		portStr = strconv.Itoa(port)
-	} else {
-		portStr = strconv.Itoa(port)
-	}
-	return net.JoinHostPort(host, portStr)
-}
+func getAddr(addr string) string { _ = "STUB: not implemented"; return "" }
 
 // getHostname constructs a full URL with the appropriate scheme (http/https)
 // based on whether TLS is enabled, and resolves the hostname from the address.
-func getHostname(addr string, isTls bool) string {
-	hostname := "http://"
-	if isTls {
-		hostname = "https://"
-	}
-	return hostname + resolveHostname(addr)
-}
+func getHostname(addr string, isTls bool) string { _ = "STUB: not implemented"; return "" }
 
 // TreeFind searches for a handler matching the given path in the routing tree.
 // It returns the engine, handler function, middleware stack, and a boolean
 // indicating whether a match was found.
 func (u utils) TreeFind(t *Tree, path string) (*Engine, handlerFn, []handlerFn, bool) {
-	nodes := t.Find(path, false)
-	for i := range nodes {
-		node := nodes[i]
-		if node.handle != nil {
-			if node.path == path {
-				return node.engine, node.handle, node.middleware, true
-			}
-		}
-	}
-
-	if len(nodes) == 0 || strings.HasSuffix(path, "/") {
-		res := strings.Split(path, "/")
-		p := ""
-		if len(res) == 1 {
-			p = res[0]
-		} else {
-			p = res[1]
-		}
-		nodes := t.Find(p, true)
-		for i := range nodes {
-			if handler := nodes[i].handle; handler != nil && nodes[i].path != path {
-				if matchParamsMap, ok := u.URLMatchAndParse(path, nodes[i].path); ok {
-					return nodes[i].engine, func(c *Context) error {
-						req := c.Request
-						ctx := context.WithValue(req.Context(), u.ContextKey, matchParamsMap)
-						c.Request = req.WithContext(ctx)
-						return nodes[i].Handle()(c)
-					}, nodes[i].middleware, true
-				}
-			}
-		}
-	}
-	return nil, nil, nil, false
+	_ = "STUB: not implemented"
+	return nil, *new(handlerFn), nil, false
 }
 
 // CompletionPath ensures a path has the correct prefix and format.
 // It adds the prefix if needed and ensures the path starts with a slash.
-func (utils) CompletionPath(p, prefix string) string {
-	suffix := strings.HasSuffix(p, "/")
-	p = strings.TrimLeft(p, "/")
-	prefix = strings.TrimRight(prefix, "/")
-	path := zstring.TrimSpace(path.Join("/", prefix, p))
-
-	if path == "" {
-		path = "/"
-	} else if suffix && path != "/" {
-		path = path + "/"
-	}
-
-	return path
-}
+func (utils) CompletionPath(p, prefix string) string { _ = "STUB: not implemented"; return "" }
 
 // IsAbort checks if request handling has been aborted for the given context.
 // It returns true if the context's stopHandle flag is set.
-func (utils) IsAbort(c *Context) bool {
-	return c.stopHandle.Load()
-}
+func (utils) IsAbort(c *Context) bool { _ = "STUB: not implemented"; return false }
 
 // IsModified checks if a resource has been modified since the last request based on the If-Modified-Since header.
 func (utils) IsModified(c *Context, modTime time.Time) bool {
-	return isModified(c, modTime)
+	_ = "STUB: not implemented"
+	return false
 }
 
 // AppendHandler appends handlers to the context's middleware stack.
 // Use with caution as this modifies the middleware chain during request processing.
-func (utils) AppendHandler(c *Context, handlers ...Handler) {
-	hl := len(handlers)
-	if hl == 0 {
-		return
-	}
-
-	for i := range handlers {
-		c.middleware = append(c.middleware, Utils.ParseHandlerFunc(handlers[i], c.Engine.customRenderings...))
-	}
-}
+func (utils) AppendHandler(c *Context, handlers ...Handler) { _ = "STUB: not implemented"; return }
 
 // resolveAddr converts an address string and optional TLS configuration
 // into an addrSt structure used for server configuration.
 func resolveAddr(addrString string, tlsConfig ...TlsCfg) addrSt {
-	cfg := addrSt{
-		addr: addrString,
-	}
-	if len(tlsConfig) > 0 {
-		cfg.Cert = tlsConfig[0].Cert
-		cfg.HTTPAddr = tlsConfig[0].HTTPAddr
-		cfg.HTTPProcessing = tlsConfig[0].HTTPProcessing
-		cfg.Key = tlsConfig[0].Key
-		cfg.Config = tlsConfig[0].Config
-	}
-	return cfg
+	_ = "STUB: not implemented"
+	return *new(addrSt)
 }
 
 // resolveHostname extracts or constructs a hostname from an address string.
 // It handles various formats including IP addresses and port specifications.
-func resolveHostname(addrString string) string {
-	if strings.Index(addrString, ":") == 0 {
-		return "127.0.0.1" + addrString
-	}
-	return addrString
-}
+func resolveHostname(addrString string) string { _ = "STUB: not implemented"; return "" }
 
 // templateParse parses template files and applies the provided function map.
 // It returns the parsed template or an error if parsing fails.
 func templateParse(templateFile []string, funcMap template.FuncMap) (t *template.Template, err error) {
-	if len(templateFile) == 0 {
-		return nil, errors.New("template file cannot be empty")
-	}
-	file := templateFile[0]
-	if len(file) <= 255 && zfile.FileExist(file) {
-		for i := range templateFile {
-			templateFile[i] = zfile.RealPath(templateFile[i])
-		}
-		t, err = template.ParseFiles(templateFile...)
-		if err == nil && funcMap != nil {
-			t.Funcs(funcMap)
-		}
-	} else {
-		t = template.New("")
-		if funcMap != nil {
-			t.Funcs(funcMap)
-		}
-		t, err = t.Parse(file)
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // tlsRedirectHandler implements http.Handler to redirect HTTP requests to HTTPS.
@@ -430,76 +140,28 @@ type tlsRedirectHandler struct {
 // ServeHTTP implements the http.Handler interface.
 // It redirects HTTP requests to HTTPS using a 301 Moved Permanently status.
 func (h *tlsRedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, h.Domain+r.URL.String(), http.StatusMovedPermanently)
+	_ = "STUB: not implemented"
+	return
 }
 
 // NewContext creates a new Context instance for handling a request.
 // This is used when you need to manually create a context outside the normal request flow.
 func (e *Engine) NewContext(w http.ResponseWriter, req *http.Request) *Context {
-	return &Context{
-		Writer:        w,
-		Request:       req,
-		Engine:        e,
-		Log:           e.Log,
-		startTime:     time.Time{},
-		header:        map[string][]string{},
-		customizeData: map[string]interface{}{},
-		stopHandle:    zutil.NewBool(false),
-		done:          zutil.NewBool(false),
-		prevData: &PrevData{
-			Code: zutil.NewInt32(0),
-			Type: ContentTypePlain,
-		},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // acquireContext gets a Context instance from the pool or creates a new one if the pool is empty.
 // This is used internally to efficiently reuse Context objects.
 func (e *Engine) acquireContext(w http.ResponseWriter, r *http.Request) *Context {
-	c := e.pool.Get().(*Context)
-	c.Engine = e
-	c.Request = r
-	c.Writer = w
-	c.injector = zdi.New(c.Engine.injector)
-	c.injector.Maps(c)
-	c.startTime = time.Now()
-	c.renderError = defErrorHandler()
-	c.stopHandle.Store(false)
-	c.done.Store(false)
-	return c
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // releaseContext returns a Context to the pool after it's been used.
 // It resets the Context to its zero state before returning it to the pool.
-func (e *Engine) releaseContext(c *Context) {
-	c.prevData.Code.Store(0)
-	c.mu.Lock()
-
-	for k := range c.customizeData {
-		delete(c.customizeData, k)
-	}
-	for k := range c.header {
-		delete(c.header, k)
-	}
-
-	c.middleware = c.middleware[0:0]
-	c.render = nil
-	c.renderError = nil
-	c.cacheJSON = nil
-	c.cacheQuery = nil
-	c.cacheForm = nil
-	c.injector = nil
-	c.rawData = nil
-	c.Engine = nil
-	c.ip = ""
-	c.prevData.Content = c.prevData.Content[0:0]
-	c.prevData.Type = ContentTypePlain
-	c.mu.Unlock()
-	e.pool.Put(c)
-}
+func (e *Engine) releaseContext(c *Context) { _ = "STUB: not implemented"; return }
 
 // GetAddr returns the address string of the server.
 // This is used to display the server's listening address.
-func (s *serverMap) GetAddr() string {
-	return s.srv.Addr
-}
+func (s *serverMap) GetAddr() string { _ = "STUB: not implemented"; return "" }

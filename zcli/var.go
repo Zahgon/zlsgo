@@ -3,12 +3,10 @@ package zcli
 import (
 	"flag"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/sohaha/zlsgo/zlocale"
 	"github.com/sohaha/zlsgo/zlog"
-	"github.com/sohaha/zlsgo/ztype"
 )
 
 type (
@@ -98,253 +96,67 @@ var (
 )
 
 // getBuiltInTranslations returns the built-in translation mappings
-func getBuiltInTranslations() map[string]map[string]string {
-	return map[string]map[string]string{
-		"en": {
-			"command_empty": "Command name cannot be empty",
-			"help":          "Show Command help",
-			"version":       "View version",
-			"detach":        "Running in the background",
-			"test":          "Test",
-			"restart":       "Restart service",
-			"stop":          "Stop service",
-			"start":         "Start service",
-			"status":        "Service status",
-			"uninstall":     "Uninstall service",
-			"install":       "Install service",
-		},
-		"zh": {
-			"command_empty": "命令名不能为空",
-			"help":          "显示帮助信息",
-			"version":       "查看版本信息",
-			"detach":        "后台运行",
-			"restart":       "重启服务",
-			"stop":          "停止服务",
-			"start":         "开始服务",
-			"status":        "服务状态",
-			"uninstall":     "卸载服务",
-			"install":       "安装服务",
-		},
-	}
-}
+func getBuiltInTranslations() map[string]map[string]string { _ = "STUB: not implemented"; return nil }
 
 // initInternalI18n initializes the internal zlocale instance with existing translations
-func initInternalI18n() {
-	initOnce.Do(func() {
-		internalI18n = zlocale.New("en")
+func initInternalI18n() { _ = "STUB: not implemented"; return }
 
-		// Load built-in translations into zlocale
-		translations := getBuiltInTranslations()
-		for langCode, langData := range translations {
-			langName := langCode
-			switch langCode {
-			case "en":
-				langName = "English"
-			case "zh":
-				langName = "简体中文"
-			}
-			internalI18n.LoadLanguage(langCode, langName, langData)
-		}
-
-		internalI18n.SetLanguage(Lang)
-		lastSyncedLang = Lang
-	})
-}
+// Load built-in translations into zlocale
 
 // syncLanguageWithInternalI18n ensures the internal i18n instance matches the current Lang setting
 // Uses caching to avoid unnecessary language switches for better performance
 func syncLanguageWithInternalI18n() {
-	initInternalI18n()
+	_ = "STUB: not implemented"
 
 	// Only sync if language has actually changed
-	if lastSyncedLang != Lang {
-		err := internalI18n.SetLanguage(Lang)
-		if err != nil {
-			lastSyncedLang = Lang
-			return
-		}
-		lastSyncedLang = Lang
-	}
+	return
 }
 
 // SetLangText adds or updates a localized text string for the specified language and key.
 // This allows customizing or extending the built-in localization support.
-func SetLangText(lang, key, value string) {
-	initInternalI18n()
-
-	internalI18n.LoadLanguage(lang, lang, map[string]string{key: value})
-
-	l, ok := langs[lang]
-	if !ok {
-		l = map[string]string{}
-	}
-	l[key] = value
-	langs[lang] = l
-}
+func SetLangText(lang, key, value string) { _ = "STUB: not implemented"; return }
 
 // GetLangText retrieves a localized text string for the current language setting.
 // If the key is not found in the current language, it falls back to the default language.
 // If still not found and a default value is provided, it returns that value.
 // Otherwise, it returns the key itself.
-func GetLangText(key string, def ...string) string {
-	initInternalI18n()
-
-	syncLanguageWithInternalI18n()
-
-	translation := internalI18n.T(key)
-
-	if _, exists := langs[Lang]; !exists {
-		if lang, ok := langs[defaultLang][key]; ok {
-			return lang
-		}
-		if len(def) > 0 {
-			return def[0]
-		}
-		return key
-	}
-
-	if translation == key {
-		if lang, ok := langs[Lang][key]; ok {
-			return lang
-		}
-		if lang, ok := langs[defaultLang][key]; ok {
-			return lang
-		}
-		if len(def) > 0 {
-			return def[0]
-		}
-		return key
-	}
-
-	return translation
-}
+func GetLangText(key string, def ...string) string { _ = "STUB: not implemented"; return "" }
 
 // Write implements the io.Writer interface for custom error handling.
 // It formats and displays error messages through the Error function.
-func (e *errWrite) Write(p []byte) (n int, err error) {
-	Error(strings.Replace(ztype.ToString(p), cliPrefix, "", 1))
-	return 1, nil
-}
+func (e *errWrite) Write(p []byte) (n int, err error) { _ = "STUB: not implemented"; return 0, nil }
 
 // SetVar creates a new flag variable with the specified name and usage description.
 // It returns a variable object that can be further configured with type, default value, and options.
-func SetVar(name, usage string) *v {
-	v := &v{
-		name:  cliPrefix + name,
-		usage: usage,
-	}
-	varsKey[name] = v
-	return v
-}
+func SetVar(name, usage string) *v { _ = "STUB: not implemented"; return nil }
 
 // short adds a short alias for the flag (e.g., -h for --help).
 // Returns the variable object for method chaining.
-func (v *v) short(short string) *v {
-	v.shorts = append(v.shorts, short)
-	// todo prevent duplicate addition
-	varShortsKey = append(varShortsKey, short)
-	return v
-}
+func (v *v) short(short string) *v { _ = "STUB: not implemented"; return nil }
+
+// todo prevent duplicate addition
 
 // Required marks the flag as required, meaning the application will report an error
 // if the flag is not provided by the user. Returns the variable object for method chaining.
-func (v *v) Required() *v {
-	if matchingCmd != nil {
-		matchingCmd.requiredFlags = append(matchingCmd.requiredFlags, v.name)
-	} else {
-		requiredFlags = append(requiredFlags, v.name)
-	}
-	return v
-}
+func (v *v) Required() *v { _ = "STUB: not implemented"; return nil }
 
 // String defines a string flag with an optional default value.
 // Returns a pointer to the string value that will be populated when the flag is parsed.
-func (v *v) String(def ...string) *string {
-	var value string
-	if len(def) > 0 {
-		value = def[0]
-	}
-	v.setFlagbind(func(name string) {
-		ShortValues[name] = setFlags(v, value, func() interface{} {
-			return flag.String(name, value, v.usage)
-		}).(*string)
-	})
-	return setFlags(v, value, func() interface{} {
-		return flag.String(v.name, value, v.usage)
-	}).(*string)
-}
+func (v *v) String(def ...string) *string { _ = "STUB: not implemented"; return nil }
 
 // Int defines an integer flag with an optional default value.
 // Returns a pointer to the integer value that will be populated when the flag is parsed.
-func (v *v) Int(def ...int) *int {
-	var value int
-	if len(def) > 0 {
-		value = def[0]
-	}
-	v.setFlagbind(func(name string) {
-		ShortValues[name] = setFlags(v, value, func() interface{} {
-			return flag.Int(name, value, v.usage)
-		}).(*int)
-	})
-	return setFlags(v, value, func() interface{} {
-		return flag.Int(v.name, value, v.usage)
-	}).(*int)
-}
+func (v *v) Int(def ...int) *int { _ = "STUB: not implemented"; return nil }
 
 // Bool defines a boolean flag with an optional default value.
 // Returns a pointer to the boolean value that will be populated when the flag is parsed.
-func (v *v) Bool(def ...bool) *bool {
-	var value bool
-	if len(def) > 0 {
-		value = def[0]
-	}
-	v.setFlagbind(func(name string) {
-		ShortValues[name] = setFlags(v, value, func() interface{} {
-			return flag.Bool(name, value, v.usage)
-		}).(*bool)
-	})
-	return setFlags(v, value, func() interface{} {
-		return flag.Bool(v.name, value, v.usage)
-	}).(*bool)
-}
+func (v *v) Bool(def ...bool) *bool { _ = "STUB: not implemented"; return nil }
 
 var flags = map[string]interface{}{}
 
 func setFlags(v *v, value interface{}, fn func() interface{}) (p interface{}) {
-	p, ok := flags[v.name]
-	if !ok {
-		flags[v.name] = fn()
-		return flags[v.name]
-	}
-
-	switch val := value.(type) {
-	case bool:
-		b, ok := p.(*bool)
-		if !ok {
-			Error("flag %s type error, it needs to be an bool", v.name)
-		}
-		*b = val
-		return b
-	case string:
-		s, ok := p.(*string)
-		if !ok {
-			Error("flag %s type error, it needs to be an string", v.name)
-		}
-		*s = val
-		return s
-	case int:
-		i, ok := p.(*int)
-		if !ok {
-			Error("flag %s type error, it needs to be an int", v.name)
-		}
-		*i = val
-		return i
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func (v *v) setFlagbind(fn func(name string)) {
-	for _, s := range v.shorts {
-		fn(s)
-	}
-}
+func (v *v) setFlagbind(fn func(name string)) { _ = "STUB: not implemented"; return }

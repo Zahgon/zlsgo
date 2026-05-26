@@ -5,8 +5,6 @@ package zarray
 
 import (
 	"errors"
-	"fmt"
-	"math/rand"
 )
 
 // Array represents a dynamic array that supports insertion, deletion, and random access
@@ -21,285 +19,137 @@ var ErrIllegalIndex = errors.New("illegal index")
 
 // NewArray initializes a new Array with the specified capacity.
 // If no capacity is provided, a default capacity of 5 is used.
-func NewArray(capacity ...int) (array *Array) {
-	c := 5
-	if len(capacity) >= 1 && capacity[0] != 0 {
-		c = capacity[0]
-	}
-
-	return &Array{
-		data: make([]interface{}, c),
-		size: 0,
-	}
-}
+func NewArray(capacity ...int) (array *Array) { _ = "STUB: not implemented"; return nil }
 
 // Deprecated: New is deprecated, please use NewArray instead
-func New(capacity ...int) (array *Array) {
-	return NewArray(capacity...)
-}
+func New(capacity ...int) (array *Array) { _ = "STUB: not implemented"; return nil }
 
 // CopyArray creates a new Array by copying all elements from the provided array.
 // Returns the new Array and any error that occurred during copying.
 func CopyArray(arr interface{}) (array *Array, err error) {
-	data, ok := arr.([]interface{})
-	if ok {
-		l := len(data)
-		array = NewArray(l)
-		for i := 0; i < l; i++ {
-			array.Push(data[i])
-		}
-	} else {
-		err = errors.New("type of error")
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Deprecated: Copy is deprecated, please use CopyArray instead
 func Copy(arr interface{}) (array *Array, err error) {
-	return CopyArray(arr)
+	_ = "STUB: not implemented"
+	return nil,
+
+		// checkIndex determines whether the provided index is out of bounds.
+		// Returns true if the index is invalid, along with the current size of the array.
+		nil
 }
 
-// checkIndex determines whether the provided index is out of bounds.
-// Returns true if the index is invalid, along with the current size of the array.
-func (arr *Array) checkIndex(index int) (bool, int) {
-	size := arr.size
-	if index < 0 || index >= size {
-		return true, size
-	}
-
-	return false, size
-}
+func (arr *Array) checkIndex(index int) (bool, int) { _ = "STUB: not implemented"; return false, 0 }
 
 // resize expands the array's capacity to the specified size by creating
 // a new underlying array and copying all existing elements.
-func (arr *Array) resize(capacity int) {
-	newArray := make([]interface{}, capacity)
-	for i := 0; i < arr.size; i++ {
-		newArray[i] = arr.data[i]
-	}
-	arr.data = newArray
-}
+func (arr *Array) resize(capacity int) { _ = "STUB: not implemented"; return }
 
 // CapLength returns the current capacity of the array
-func (arr *Array) CapLength() int {
-	return cap(arr.data)
-}
+func (arr *Array) CapLength() int { _ = "STUB: not implemented"; return 0 }
 
 // Length returns the current number of elements in the array
 func (arr *Array) Length() int {
-	return arr.size
+	_ = "STUB: not implemented"
+
+	// IsEmpty returns true if the array contains no elements, false otherwise
+	return 0
 }
 
-// IsEmpty returns true if the array contains no elements, false otherwise
-func (arr *Array) IsEmpty() bool {
-	return arr.size == 0
-}
+func (arr *Array) IsEmpty() bool { _ = "STUB: not implemented"; return false }
 
 // Unshift inserts an element at the beginning of the array.
 // Returns an error if the operation fails.
-func (arr *Array) Unshift(value interface{}) error {
-	return arr.Add(0, value)
-}
+func (arr *Array) Unshift(value interface{}) error { _ = "STUB: not implemented"; return nil }
 
 // Push appends one or more elements to the end of the array
-func (arr *Array) Push(values ...interface{}) {
-	for i := 0; i < len(values); i++ {
-		_ = arr.Add(arr.size, values[i])
-	}
-}
+func (arr *Array) Push(values ...interface{}) { _ = "STUB: not implemented"; return }
 
 // Add inserts an element at the specified index position.
 // Returns an error if the index is out of bounds or if the operation fails.
 func (arr *Array) Add(index int, value interface{}) (err error) {
-	if index < 0 || index > arr.size {
-		err = errors.New("add failed. Require index >= 0 and index <= size")
-		return
-	}
-
-	// If the current number of elements is equal to the arr capacity,
-	// the arr will be expanded to twice the original size
-	capLen := arr.CapLength()
-	if arr.size == capLen {
-		arr.resize(capLen * 2)
-	}
-
-	for i := arr.size - 1; i >= index; i-- {
-		arr.data[i+1] = arr.data[i]
-	}
-
-	arr.data[index] = value
-	arr.size++
-	return
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// If the current number of elements is equal to the arr capacity,
+// the arr will be expanded to twice the original size
 
 // Map creates a new array by applying the provided function to each element.
 // The function receives the index and value of each element and returns the transformed value.
 func (arr *Array) Map(fn func(int, interface{}) interface{}) *Array {
-	values, _ := Copy(arr.data)
-	for i := 0; i < values.Length(); i++ {
-		value, _ := values.Get(i)
-		_ = values.Set(i, fn(i, value))
-	}
-	return values
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Get retrieves the element at the specified index position.
 // If the index is invalid and a default value is provided, returns the default value.
 // Otherwise returns the element and any error that occurred.
 func (arr *Array) Get(index int, def ...interface{}) (value interface{}, err error) {
-	if r, _ := arr.checkIndex(index); r {
-		err = ErrIllegalIndex
-		if dValue, dErr := GetInf(def, 0, nil); dErr == nil {
-			value = dValue
-		}
-		return
-	}
-
-	value = arr.data[index]
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Set modifies the element at the specified index position.
 // Returns an error if the index is out of bounds.
 func (arr *Array) Set(index int, value interface{}) (err error) {
-	if r, _ := arr.checkIndex(index); r {
-		return ErrIllegalIndex
-	}
-
-	arr.data[index] = value
-	return
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Contains checks if the specified value exists in the array.
 // Returns true if found, false otherwise.
-func (arr *Array) Contains(value interface{}) bool {
-	for i := 0; i < arr.size; i++ {
-		if arr.data[i] == value {
-			return true
-		}
-	}
-
-	return false
-}
+func (arr *Array) Contains(value interface{}) bool { _ = "STUB: not implemented"; return false }
 
 // Index finds the position of the specified value in the array.
 // Returns the index (in range [0, n-1]) if found, or -1 if not found.
-func (arr *Array) Index(value interface{}) int {
-	for i := 0; i < arr.size; i++ {
-		if arr.data[i] == value {
-			return i
-		}
-	}
-
-	return -1
-}
+func (arr *Array) Index(value interface{}) int { _ = "STUB: not implemented"; return 0 }
 
 // Remove deletes one or more elements starting at the specified index position.
 // Returns the removed elements and any error that occurred during the operation.
 func (arr *Array) Remove(index int, l ...int) (value []interface{}, err error) {
-	r, size := arr.checkIndex(index)
-
-	if r {
-		err = ErrIllegalIndex
-		return
-	}
-	removeL := 1
-	if len(l) > 0 && l[0] > 1 {
-		removeL = l[0]
-	}
-	if index+removeL > size {
-		err = ErrIllegalIndex
-		return
-	}
-
-	value = make([]interface{}, removeL)
-	copy(value, arr.data[index:index+removeL])
-	for i := index + removeL; i < arr.size; i++ {
-		arr.data[i-removeL] = arr.data[i]
-		arr.data[i] = nil
-	}
-
-	arr.size = size - removeL
-	capLen := arr.CapLength()
-	if arr.size == capLen/4 && capLen/2 != 0 {
-		arr.resize(capLen / 2)
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Shift removes and returns the first element of the array.
 // Returns the removed element and any error that occurred during the operation.
 func (arr *Array) Shift() (interface{}, error) {
-	return arr.Remove(0)
+	_ = "STUB: not implemented"
+	return nil,
+
+		// Pop removes and returns the last element of the array.
+		// Returns the removed element and any error that occurred during the operation.
+		nil
 }
 
-// Pop removes and returns the last element of the array.
-// Returns the removed element and any error that occurred during the operation.
-func (arr *Array) Pop() (interface{}, error) {
-	return arr.Remove(arr.size - 1)
-}
+func (arr *Array) Pop() (interface{}, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // RemoveValue removes the first occurrence of the specified element from the array.
 // Returns the removed element and any error that occurred during the operation.
 func (arr *Array) RemoveValue(value interface{}) (e interface{}, err error) {
-	index := arr.Index(value)
-	if index != -1 {
-		e, err = arr.Remove(index)
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Clear removes all elements from the array, resetting it to an empty state
-func (arr *Array) Clear() {
-	arr.data = make([]interface{}, arr.size)
-	arr.size = 0
-}
+func (arr *Array) Clear() { _ = "STUB: not implemented"; return }
 
 // Raw returns a copy of the underlying array data as a slice of interface{} values
-func (arr *Array) Raw() []interface{} {
-	v := make([]interface{}, arr.size)
-	copy(v, arr.data)
-	return v
-}
+func (arr *Array) Raw() []interface{} { _ = "STUB: not implemented"; return nil }
 
 // Format returns a string representation of the array including its size, capacity, and elements
-func (arr *Array) Format() (format string) {
-	format = fmt.Sprintf("Array: size = %d , capacity = %d\n", arr.size, cap(arr.data))
-	format += "["
-	for i := 0; i < arr.Length(); i++ {
-		format += fmt.Sprintf("%+v", arr.data[i])
-		if i != arr.size-1 {
-			format += ", "
-		}
-	}
-	format += "]"
-	return
-}
+func (arr *Array) Format() (format string) { _ = "STUB: not implemented"; return "" }
 
 // Shuffle creates a new array with the same elements in random order
-func (arr *Array) Shuffle() (array *Array) {
-	data := arr.Raw()
-	rand.Shuffle(len(data), func(i, j int) {
-		data[i], data[j] = data[j], data[i]
-	})
-	array, _ = Copy(data)
-	return
-}
+func (arr *Array) Shuffle() (array *Array) { _ = "STUB: not implemented"; return nil }
 
 // GetInf retrieves the element at the specified index from a slice of interface{} values.
 // If the index is invalid and a default value is provided, returns the default value.
 // Otherwise returns the element and any error that occurred.
 func GetInf(arr []interface{}, index int, def ...interface{}) (value interface{}, err error) {
-	arrLen := len(arr)
-	if arrLen > 0 && index < arrLen {
-		value = arr[index]
-	} else {
-		err = ErrIllegalIndex
-		var dValue interface{}
-		if len(def) > 0 {
-			dValue = def[0]
-		}
-		value = dValue
-	}
-	return
+	_ = "STUB: not implemented"
+	return nil, nil
 }
